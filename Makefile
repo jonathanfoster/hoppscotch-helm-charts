@@ -1,5 +1,9 @@
 .DEFAULT_GOAL := help
 
+.PHONY: clean
+clean: ## Clean up chart release packages
+	rm -rf .cr-release-packages
+
 .PHONY: help
 help: ## Show this help message
 	@echo "Usage: make [target]"
@@ -9,6 +13,7 @@ help: ## Show this help message
 
 .PHONY: install-deps-macos
 install-deps-macos: ## Install dependencies for MacOS
+	brew install chart-releaser
 	brew install chart-testing
 	brew install kind
 	brew install shellcheck
@@ -23,6 +28,10 @@ lint-charts: ## Lint charts
 .PHONY: lint-shell
 lint-shell: ## Lint shell scripts
 	find . -type f -name "*.sh" | xargs shellcheck
+
+.PHONY: package
+package: clean ## Package Helm charts
+	cr package charts/*
 
 .PHONY: test-e2e
 test-e2e: ## Run end-to-end tests
