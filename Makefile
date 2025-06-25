@@ -10,10 +10,20 @@ help: ## Show this help message
 .PHONY: install-deps-macos
 install-deps-macos: ## Install dependencies for MacOS
 	brew install chart-testing
+	brew install kind
+	brew install shellcheck
 
 .PHONY: lint
-lint: lint-charts ## Run all linters
+lint: lint-charts lint-shell ## Run all linters
 
 .PHONY: lint-charts
 lint-charts: ## Lint charts
 	ct lint
+
+.PHONY: lint-shell
+lint-shell: ## Lint shell scripts
+	find . -type f -name "*.sh" | xargs shellcheck
+
+.PHONY: test-e2e
+test-e2e: ## Run end-to-end tests
+	./test/test-e2e.sh
