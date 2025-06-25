@@ -30,7 +30,7 @@ lint-shell: ## Lint shell scripts
 	find . -type f -name "*.sh" | xargs shellcheck
 
 .PHONY: package
-package: clean ## Package Helm charts
+package: clean ## Package charts
 	cr package charts/*
 
 .PHONY: test-e2e
