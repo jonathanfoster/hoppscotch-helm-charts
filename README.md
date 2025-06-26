@@ -46,12 +46,14 @@
 <summary><b>Digital Ocean Installation</b></summary>
 
 ## Prerequisites
+
 - Digital Ocean account with administrative access
 - kubectl CLI tool
 - Helm 3.x installed
 - doctl installed
 
 ## Quick Install
+
 ```bash
 # Configure access
 export KUBECONFIG=path/to/k8s-config.yaml
@@ -59,12 +61,15 @@ export KUBECONFIG=path/to/k8s-config.yaml
 # (Optional) Install NGINX Ingress
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/do/deploy.yaml
 
+# Add chart repository
+helm repo add hoppscotch https://hoppscotch.github.io/helm-charts
+
 # Deploy application
 ## Community
-helm install [RELEASE_NAME] ./charts/shc -f [path-to-values-file]
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-community -f [path-to-values-file]
 
 ## Enterprise
-helm install [RELEASE_NAME] ./charts/she -f [path-to-values-file]
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-enterprise -f [path-to-values-file]
 ```
 
 </details>
@@ -73,12 +78,14 @@ helm install [RELEASE_NAME] ./charts/she -f [path-to-values-file]
 <summary><b>GCP Installation</b></summary>
 
 ## Prerequisites
+
 - Google Cloud account with GKE access
 - gcloud CLI configured
 - kubectl CLI tool
 - Helm 3.x installed
 
 ## Quick Install
+
 ```bash
 # Configure cluster access
 gcloud container clusters get-credentials cluster-name --zone zone --project project-id
@@ -86,12 +93,15 @@ gcloud container clusters get-credentials cluster-name --zone zone --project pro
 # (Optional) Install NGINX Ingress
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
 
+# Add chart repository
+helm repo add hoppscotch https://hoppscotch.github.io/helm-charts
+
 # Deploy application
 ## Community
-helm install [RELEASE_NAME] ./charts/shc -f [path-to-values-file]
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-community -f [path-to-values-file]
 
 ## Enterprise
-helm install [RELEASE_NAME] ./charts/she -f [path-to-values-file]
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-enterprise -f [path-to-values-file]
 ```
 
 </details>
@@ -111,11 +121,9 @@ Please contribute using [GitHub Flow](https://guides.github.com/introduction/flo
 
 Please read [`CONTRIBUTING`](CONTRIBUTING.md) for details on our [`CODE OF CONDUCT`](CODE_OF_CONDUCT.md), and the process for submitting pull requests to us.
 
-
 ## **Continuous Integration**
 
 We use [GitHub Actions](https://github.com/features/actions) for continuous integration.
-
 
 ## **Authors**
 
