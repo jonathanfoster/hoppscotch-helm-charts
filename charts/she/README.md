@@ -44,7 +44,9 @@ Update the URLs for mainHost, backendHost, adminHost and related urls in the `va
     adminHost: admin.yourdomain.com
     backendHost: backend.yourdomain.com
 ```
+
 when **subpath is enabled**. Only update the mainHost and related urls:
+
 ```yaml
   urls:
     base: "http://yourdomain.com"
@@ -58,7 +60,7 @@ when **subpath is enabled**. Only update the mainHost and related urls:
     whitelistedOrigins: "http://yourdomain.com/backend,http://yourdomain.com,http://yourdomain.com/admin"
 
   enableSubpathBasedAccess: true
-  
+
   # Ingress Configuration
   ingress:
     enabled: true
@@ -100,12 +102,14 @@ service:
 Then install the chart with your custom values:
 
 ```bash
-helm install [RELEASE_NAME] ./charts/she -f values.yaml
+helm repo add hoppscotch https://hoppscotch.github.io/helm-charts
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-enterprise -f values.yaml
 ```
 
 ### Database Configuration
 
 #### ClickHouse Configuration
+
 ```yaml
 enterprise:
   config:
@@ -117,7 +121,7 @@ enterprise:
       host: "your-clickhouse-host"
       user: "your-clickhouse-user"
       password: "your-clickhouse-password"
-      
+
       # Self-hosted ClickHouse configuration
       clickhouse:
         image: "clickhouse/clickhouse-server:latest"
@@ -128,6 +132,7 @@ enterprise:
 ```
 
 #### Redis Configuration
+
 ```yaml
 enterprise:
   config:
@@ -138,7 +143,7 @@ enterprise:
       external: false
       host: "your-redis-host"
       password: "your-redis-password"
-      
+
       # Self-hosted Redis configuration
       redis:
         image: "redis:latest"
@@ -169,17 +174,20 @@ helm uninstall [RELEASE_NAME]
 ## Enterprise Support
 
 As an enterprise customer, you have access to:
+
 - Priority issue resolution
 - Custom feature requests
 - Implementation assistance
 
 Contact enterprise support through:
+
 - Enterprise Support Portal
 - Priority Email Support
 
 ## License Management
 
 Enterprise license management includes:
+
 - License renewal
 - Capacity management
 - Feature activation
@@ -187,6 +195,7 @@ Enterprise license management includes:
 ## Security and Compliance
 
 Enterprise security features include:
+
 - Access control
 - Audit logging
 - Enhanced security controls

@@ -35,7 +35,9 @@ Update the URLs for mainHost, backendHost, adminHost and related urls in the `va
     adminHost: admin.yourdomain.com
     backendHost: backend.yourdomain.com
 ```
+
 when **subpath is enabled**. Only update the mainHost and related urls:
+
 ```yaml
   urls:
     base: "http://yourdomain.com"
@@ -49,7 +51,7 @@ when **subpath is enabled**. Only update the mainHost and related urls:
     whitelistedOrigins: "http://yourdomain.com/backend,http://yourdomain.com,http://yourdomain.com/admin"
 
   enableSubpathBasedAccess: true
-  
+
   # Ingress Configuration
   ingress:
     enabled: true
@@ -88,7 +90,8 @@ service:
 Then install the chart with your custom values:
 
 ```bash
-helm install [RELEASE_NAME] ./charts/shc -f values.yaml
+helm repo add hoppscotch https://hoppscotch.github.io/helm-charts
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-community -f values.yaml
 ```
 
 ## Uninstalling the Chart

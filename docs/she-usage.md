@@ -5,16 +5,18 @@ This guide covers the installation and usage of the Enterprise Edition of Hoppsc
 ## Enterprise Features
 
 Additional features beyond the Community Edition:
+
 - Enhanced scalability options
 - High availability configurations
 - Enterprise-grade support
-- Advanced monitoring 
+- Advanced monitoring
 
 ## Installation
 
 ### Digital Ocean Installation
 
 1. **Prerequisites**
+
 ```bash
 # Required tools
 - Digital Ocean account with administrative access
@@ -24,6 +26,7 @@ Additional features beyond the Community Edition:
 ```
 
 2. **Deployment Steps**
+
 ```bash
 # Configure access
 export KUBECONFIG=path/to/k8s-config.yaml
@@ -31,16 +34,20 @@ export KUBECONFIG=path/to/k8s-config.yaml
 # (Optional) Install NGINX Ingress
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/do/deploy.yaml
 
+# Add chart repository
+helm repo add hoppscotch https://hoppscotch.github.io/helm-charts
+
 # Deploy application with default values
-helm install [RELEASE_NAME] ./charts/she
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-enterprise
 
 # Deploy application with custom values file
-helm install [RELEASE_NAME] ./charts/she -f [path-to-values-file]
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-enterprise -f [path-to-values-file]
 ```
 
 ### GCP Installation
 
 1. **Prerequisites**
+
 ```bash
 # Required tools
 - Google Cloud account with GKE access
@@ -50,6 +57,7 @@ helm install [RELEASE_NAME] ./charts/she -f [path-to-values-file]
 ```
 
 2. **Deployment Steps**
+
 ```bash
 # Configure cluster access
 gcloud container clusters get-credentials cluster-name --zone zone --project project-id
@@ -57,16 +65,20 @@ gcloud container clusters get-credentials cluster-name --zone zone --project pro
 # (Optional) Install NGINX Ingress
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
 
+# Add chart repository
+helm repo add hoppscotch https://hoppscotch.github.io/helm-charts
+
 # Deploy application with default values
-helm install [RELEASE_NAME] ./charts/she
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-enterprise
 
 # Deploy application with custom values file
-helm install [RELEASE_NAME] ./charts/she -f [path-to-values-file]
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-enterprise -f [path-to-values-file]
 ```
 
 ## Enterprise Configuration
 
 ### Basic Configuration
+
 ```yaml
 # Example values.yaml
 replicaCount: 2
@@ -78,13 +90,15 @@ image:
 ## Upgrading
 
 To upgrade your deployment:
+
 ```bash
-helm upgrade [RELEASE_NAME] ./charts/she -f [path-to-values-file]
+helm upgrade [RELEASE_NAME] hoppscotch/hoppscotch-enterprise -f [path-to-values-file]
 ```
 
 ## Compliance and Auditing
 
 Enterprise features for compliance:
+
 - Audit logging
 - Compliance reporting
 - Access control
@@ -92,11 +106,14 @@ Enterprise features for compliance:
 ## Enterprise Support
 
 Contact enterprise support:
+
 - Dedicated support portal
 - Priority issue resolution
 - Custom feature requests
 
 ## License Management
+
 Managing your enterprise license:
+
 - License renewal
 - Adding capacity
