@@ -172,9 +172,9 @@ service:
   name: hoppscotch-enterprise
   app: hoppscotch-enterprise
   # Dynamically set based on ingress
-  type: "{{ .Values.service.ingress.enabled | ternary \"ClusterIP\" \"LoadBalancer\" }}"
+  type: '{{ .Values.service.ingress.enabled | ternary "ClusterIP" "LoadBalancer" }}'
   # Only set externalTrafficPolicy for LoadBalancer
-  externalTrafficPolicy: "{{ .Values.service.ingress.enabled | ternary \"\" \"Cluster\" }}"
+  externalTrafficPolicy: '{{ .Values.service.ingress.enabled | ternary "" "Cluster" }}'
 
   ports:
     backend:

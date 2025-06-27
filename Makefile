@@ -17,6 +17,7 @@ install-deps-macos: ## Install dependencies for MacOS
 	brew install chart-testing
 	brew install kind
 	brew install shellcheck
+	brew install yamllint
 
 .PHONY: install-deps-linux
 install-deps-linux: ## Install dependencies for Linux
@@ -51,7 +52,7 @@ install-deps: ## Install dependencies (auto-detect OS)
 	fi
 
 .PHONY: lint
-lint: lint-charts lint-shell ## Run all linters
+lint: lint-charts lint-shell lint-yaml ## Run all linters
 
 .PHONY: lint-charts
 lint-charts: ## Lint charts
@@ -60,6 +61,10 @@ lint-charts: ## Lint charts
 .PHONY: lint-shell
 lint-shell: ## Lint shell scripts
 	find . -type f -name "*.sh" | xargs shellcheck
+
+.PHONY: lint-yaml
+lint-yaml: ## Lint YAML files
+	yamllint .
 
 .PHONY: package
 package: clean ## Package charts
