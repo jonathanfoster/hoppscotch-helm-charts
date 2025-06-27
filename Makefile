@@ -17,6 +17,7 @@ install-deps-macos: ## Install dependencies for MacOS
 	brew install chart-testing
 	brew install kind
 	brew install shellcheck
+	brew install yamllint
 
 .PHONY: install-deps-linux
 install-deps-linux: ## Install dependencies for Linux
@@ -51,7 +52,7 @@ install-deps: ## Install dependencies (auto-detect OS)
 	fi
 
 .PHONY: lint
-lint: lint-charts lint-shell ## Run all linters
+lint: lint-charts lint-shell lint-yaml ## Run all linters
 
 .PHONY: lint-charts
 lint-charts: ## Lint charts
@@ -61,6 +62,10 @@ lint-charts: ## Lint charts
 lint-shell: ## Lint shell scripts
 	find . -type f -name "*.sh" | xargs shellcheck
 
+.PHONY: lint-yaml
+lint-yaml: ## Lint YAML files
+	yamllint .
+
 .PHONY: package
 package: clean ## Package charts
 	cr package charts/*
@@ -68,3 +73,14 @@ package: clean ## Package charts
 .PHONY: test-e2e
 test-e2e: ## Run end-to-end tests
 	./test/test-e2e.sh
+
+.PHONY: test-unit
+test-unit: ## Run unit tests
+	@if ! helm plugin list | grep -q unittest; then \
+		echo "Installing helm unittest plugin..."; \
+		helm plugin install https://github.com/helm-unittest/helm-unittest; \
+	fi
+	helm unittest charts/shc
+
+.PHONY: test
+test: test-unit test-e2e ## Run all tests

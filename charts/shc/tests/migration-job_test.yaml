@@ -1,0 +1,51 @@
+suite: test migration job with extra environment variables
+templates:
+  - migration-job.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should render migration job without extra envs
+    template: migration-job.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-db-migration
+      - equal:
+          path: spec.template.spec.containers[0].env[0].name
+          value: DATABASE_URL
+      - lengthEqual:
+          path: spec.template.spec.containers[0].env
+          count: 1
+
+  - it: should render migration job with extra envs
+    template: migration-job.yaml
+    set:
+      community.migration.extraEnvs:
+        - name: MIGRATION_TIMEOUT
+          value: "300"
+        - name: PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK
+          value: "1"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Job
+      - equal:
+          path: spec.template.spec.containers[0].env[0].name
+          value: DATABASE_URL
+      - equal:
+          path: spec.template.spec.containers[0].env[1].name
+          value: MIGRATION_TIMEOUT
+      - equal:
+          path: spec.template.spec.containers[0].env[1].value
+          value: "300"
+      - equal:
+          path: spec.template.spec.containers[0].env[2].name
+          value: PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK
+      - equal:
+          path: spec.template.spec.containers[0].env[2].value
+          value: "1"

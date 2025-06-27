@@ -1,0 +1,11 @@
+extends: default
+ignore:
+  - charts/**/templates/
+rules:
+  comments:
+    min-spaces-from-content: 1
+  document-start: false
+  line-length:
+    max: 120
+  truthy:
+    check-keys: false

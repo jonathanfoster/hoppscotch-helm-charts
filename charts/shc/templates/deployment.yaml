@@ -69,6 +69,10 @@ spec:
             - containerPort: {{ .Values.service.ports.admin.targetPort }}
               name: {{ .Values.service.ports.admin.name }}
           {{- end }}
+          {{- if .Values.community.extraEnvs }}
+          env:
+          {{- tpl (toYaml .Values.community.extraEnvs) . | nindent 12 }}
+          {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-community-config
@@ -77,7 +81,7 @@ spec:
           resources:
             {{- toYaml .Values.community.resources | nindent 12 }}
       {{- if .Values.community.config.affinityEnabled }}
-      affinity: 
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:

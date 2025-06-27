@@ -34,7 +34,7 @@ spec:
       containers:
       - name: db-migration
         image: "{{ .Values.community.image.repository }}:{{ .Values.community.image.tag }}"
-        command: 
+        command:
           - /bin/sh
           - -c
           - |
@@ -47,3 +47,6 @@ spec:
             {{- else }}
             value: "postgresql://{{ .Values.community.config.postgresql.username }}:{{ .Values.community.config.postgresql.password }}@{{ .Release.Name }}-postgresql:5432/{{ .Values.community.config.postgresql.database }}?schema=public"
             {{- end }}
+          {{- if .Values.community.migration.extraEnvs }}
+          {{- tpl (toYaml .Values.community.migration.extraEnvs) . | nindent 10 }}
+          {{- end }}
