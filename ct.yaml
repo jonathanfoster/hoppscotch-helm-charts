@@ -1,0 +1,4 @@
+check-version-increment: false
+validate-maintainers: false
+target-branch: main
+remote: origin

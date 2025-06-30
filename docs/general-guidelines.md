@@ -26,30 +26,33 @@ Before deploying Hoppscotch using these Helm charts, ensure you have:
 
 The repository contains two main chart collections:
 
-1. **SHC (Community Edition)**
+1. **Hoppscotch Community**
    - Free and open-source version
    - Suitable for individual developers and small teams
    - Community-supported
 
-2. **SHE (Enterprise Edition)**
-   - Enhanced features for enterprise use
-   - Additional security and compliance features
-   - Professional support available
+2. **Hoppscotch Enterprise**
+    - Enhanced features for enterprise use
+    - Additional security and compliance features
+    - Professional support available
 
 ## Best Practices
 
 ### Security
+
 - Always review the values.yaml file before deployment
 - Use secret management solutions for sensitive data
 - Implement network policies as needed
 - Regular security audits and updates
 
 ### Performance
+
 - Configure resource requests and limits appropriately
 - Monitor resource utilization
 - Use horizontal pod autoscaling when needed
 
 ### High Availability
+
 - Deploy across multiple availability zones
 - Configure appropriate replica counts
 - Implement proper backup strategies
@@ -57,6 +60,7 @@ The repository contains two main chart collections:
 ## Support
 
 For support, you can:
+
 - Join our [Discord community](https://hoppscotch.io/discord)
 - Join our [Telegram group](https://hoppscotch.io/telegram)
 - Participate in [GitHub Discussions](https://github.com/hoppscotch/hoppscotch/discussions)

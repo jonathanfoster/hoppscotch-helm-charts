@@ -5,6 +5,7 @@ This guide covers the installation and usage of the Community Edition of Hoppsco
 ## Features
 
 The Community Edition includes:
+
 - Basic Kubernetes deployment configurations
 - Community support
 
@@ -13,6 +14,7 @@ The Community Edition includes:
 ### Digital Ocean Installation
 
 1. **Prerequisites**
+
 ```bash
 # Required tools
 - Digital Ocean account with administrative access
@@ -21,6 +23,7 @@ The Community Edition includes:
 ```
 
 2. **Deployment Steps**
+
 ```bash
 # Configure access
 export KUBECONFIG=path/to/k8s-config.yaml
@@ -28,16 +31,20 @@ export KUBECONFIG=path/to/k8s-config.yaml
 # (Optional) Install NGINX Ingress
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/do/deploy.yaml
 
+# Add chart repository
+helm repo add hoppscotch https://hoppscotch.github.io/helm-charts
+
 # Deploy application with default values
-helm install [RELEASE_NAME] ./charts/shc
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-community
 
 # Deploy application with custom values file
-helm install [RELEASE_NAME] ./charts/shc -f [path-to-values-file]
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-community -f [path-to-values-file]
 ```
 
 ### GCP Installation
 
 1. **Prerequisites**
+
 ```bash
 # Required tools
 - Google Cloud account with GKE access
@@ -47,6 +54,7 @@ helm install [RELEASE_NAME] ./charts/shc -f [path-to-values-file]
 ```
 
 2. **Deployment Steps**
+
 ```bash
 # Configure cluster access
 gcloud container clusters get-credentials cluster-name --zone zone --project project-id
@@ -54,16 +62,20 @@ gcloud container clusters get-credentials cluster-name --zone zone --project pro
 # (Optional) Install NGINX Ingress
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
 
+# Add chart repository
+helm repo add hoppscotch https://hoppscotch.github.io/helm-charts
+
 # Deploy application with default values
-helm install [RELEASE_NAME] ./charts/shc
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-community
 
 # Deploy application with custom values file
-helm install [RELEASE_NAME] ./charts/shc -f [path-to-values-file]
+helm install [RELEASE_NAME] hoppscotch/hoppscotch-community -f [path-to-values-file]
 ```
 
 ## Configuration
 
 ### Basic Configuration
+
 ```yaml
 # Example values.yaml
 replicaCount: 2
@@ -73,6 +85,7 @@ image:
 ```
 
 ### Advanced Configuration
+
 - Resource limits
 - Persistence settings
 - Service configurations
@@ -81,13 +94,15 @@ image:
 ## Upgrading
 
 To upgrade your deployment:
+
 ```bash
-helm upgrade [RELEASE_NAME] ./charts/shc -f [path-to-values-file]
+helm upgrade [RELEASE_NAME] hoppscotch/hoppscotch-community -f [path-to-values-file]
 ```
 
 ## Troubleshooting
 
 Common issues and solutions:
+
 1. Pod scheduling issues
 2. Resource constraints
 3. Network connectivity
@@ -96,6 +111,7 @@ Common issues and solutions:
 ## Community Support
 
 Get help from the community:
+
 - GitHub Discussions
 - Discord Channel
 - Telegram Group
