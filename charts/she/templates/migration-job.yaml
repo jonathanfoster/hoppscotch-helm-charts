@@ -21,6 +21,8 @@ spec:
       initContainers:
       - name: wait-for-postgres
         image: postgres:15-alpine
+        resources:
+          {{- toYaml .Values.enterprise.initContainers.resources | nindent 10 }}
         command:
           - /bin/sh
           - -c
@@ -34,7 +36,9 @@ spec:
       containers:
       - name: db-migration
         image: "{{ .Values.enterprise.image.repository }}:{{ .Values.enterprise.image.tag }}"
-        command: 
+        resources:
+          {{- toYaml .Values.enterprise.migration.resources | nindent 10 }}
+        command:
           - /bin/sh
           - -c
           - |

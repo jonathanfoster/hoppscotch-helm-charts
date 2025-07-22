@@ -10,15 +10,36 @@ enterprise:
     repository: hoppscotch/hoppscotch-enterprise
     tag: latest # Example: "v1.0.0"
     pullPolicy: IfNotPresent
+  # Main application resources (for deployment.yaml)
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: "500m"
+      memory: "512Mi"
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: "250m"
+      memory: "256Mi"
+
+  # Init containers configuration (used by both deployment and migration job)
+  initContainers:
+    # Resources for init containers (wait-for-postgres, etc.)
+    resources:
+      limits:
+        cpu: "200m"
+        memory: "256Mi"
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+
   migration:
     upgradeEnabled: false # If true, the migration job will run on every helm upgrade
+    # Resources for the migration job container
+    resources:
+      limits:
+        cpu: "300m"
+        memory: "256Mi"
+      requests:
+        cpu: "150m"
+        memory: "128Mi"
 
   config:
     database:
@@ -31,6 +52,13 @@ enterprise:
       database: hoppscotchEnterprise
       username: hoppscotch
       password: hoppscotch123
+      resources:
+        requests:
+          cpu: "1"
+          memory: "1Gi"
+        limits:
+          cpu: "1"
+          memory: "2Gi"
 
     mailer:
       enable: false
@@ -207,15 +235,19 @@ service:
     adminHost: admin.example.com
     backendHost: backend.example.com
     className: nginx # nginx, alb, traefik
+    annotations:
+      # Example for NGINX Ingress:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      # Example AWS ALB internal configuration:
+      # alb.ingress.kubernetes.io/scheme: "internal"
+      # alb.ingress.kubernetes.io/security-groups: "sg-12345678"
+      # alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region:account-id:certificate/cert-id"
 
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    service.kubernetes.io/load-balancer-type: "External"
-    # Example AWS ALB internal configuration
-    # alb.ingress.kubernetes.io/scheme: "internal"
-    # alb.ingress.kubernetes.io/security-groups: "sg-12345678"
-    # alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region:account-id:certificate/cert-id"
+  annotations:  # Define service annotations here if needed. For example, to configure a load balancer:
+    example.com/dummy: ""
+    # service.kubernetes.io/load-balancer-type: "External"
+
+    # Remove the empty braces ({}) and add your annotations as key-value pairs.
 
   # TLS Configuration
   tls:

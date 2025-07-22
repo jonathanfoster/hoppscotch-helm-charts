@@ -29,6 +29,8 @@ spec:
       {{- if not .Values.enterprise.config.database.external }}
       - name: wait-for-postgres
         image: postgres:15-alpine
+        resources:
+          {{- toYaml .Values.enterprise.initContainers.resources | nindent 10 }}
         command:
           - /bin/sh
           - -c
@@ -39,6 +41,8 @@ spec:
       {{- end }}
       - name: wait-for-migration
         image: bitnami/kubectl:latest
+        resources:
+          {{- toYaml .Values.enterprise.initContainers.resources | nindent 10 }}
         command:
           - /bin/sh
           - -c
@@ -77,7 +81,7 @@ spec:
           resources:
             {{- toYaml .Values.enterprise.resources | nindent 12 }}
       {{- if .Values.enterprise.config.affinityEnabled }}
-      affinity: 
+      affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
