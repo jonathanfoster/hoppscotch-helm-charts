@@ -243,9 +243,11 @@ service:
       # alb.ingress.kubernetes.io/security-groups: "sg-12345678"
       # alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region:account-id:certificate/cert-id"
 
-  annotations:  # put '{}' if you do not need service annotations
+  annotations:  # Define service annotations here if needed. For example, to configure a load balancer:
     example.com/dummy: ""
-  #  service.kubernetes.io/load-balancer-type: "External"
+    # service.kubernetes.io/load-balancer-type: "External"
+
+    # Remove the empty braces ({}) and add your annotations as key-value pairs.
 
   # TLS Configuration
   tls:
