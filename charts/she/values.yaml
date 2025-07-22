@@ -236,11 +236,12 @@ service:
     backendHost: backend.example.com
     className: nginx # nginx, alb, traefik
     annotations:
+      # Example for NGINX Ingress:
       nginx.ingress.kubernetes.io/rewrite-target: /
-      # Example AWS ALB internal configuration
-     # alb.ingress.kubernetes.io/scheme: "internal"
-     # alb.ingress.kubernetes.io/security-groups: "sg-12345678"
-     # alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region:account-id:certificate/cert-id"
+      # Example AWS ALB internal configuration:
+      # alb.ingress.kubernetes.io/scheme: "internal"
+      # alb.ingress.kubernetes.io/security-groups: "sg-12345678"
+      # alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region:account-id:certificate/cert-id"
 
   annotations:  # put '{}' if you do not need service annotations
     example.com/dummy: ""
