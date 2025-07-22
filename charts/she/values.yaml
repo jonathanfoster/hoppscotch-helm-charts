@@ -13,33 +13,33 @@ enterprise:
   # Main application resources (for deployment.yaml)
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: "500m"
+      memory: "512Mi"
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: "250m"
+      memory: "256Mi"
 
   # Init containers configuration (used by both deployment and migration job)
   initContainers:
     # Resources for init containers (wait-for-postgres, etc.)
     resources:
       limits:
-        cpu: 200m
-        memory: 256Mi
+        cpu: "200m"
+        memory: "256Mi"
       requests:
-        cpu: 100m
-        memory: 128Mi
+        cpu: "100m"
+        memory: "128Mi"
 
   migration:
     upgradeEnabled: false # If true, the migration job will run on every helm upgrade
     # Resources for the migration job container
     resources:
       limits:
-        cpu: 300m
-        memory: 256Mi
+        cpu: "300m"
+        memory: "256Mi"
       requests:
-        cpu: 150m
-        memory: 128Mi
+        cpu: "150m"
+        memory: "128Mi"
 
   config:
     database:
@@ -242,7 +242,8 @@ service:
      # alb.ingress.kubernetes.io/security-groups: "sg-12345678"
      # alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region:account-id:certificate/cert-id"
 
-  annotations: {}   #remove {} if you want to use service annotations
+  annotations:  # put '{}' if you do not need service annotations
+    example.com/dummy: ""
   #  service.kubernetes.io/load-balancer-type: "External"
 
   # TLS Configuration
