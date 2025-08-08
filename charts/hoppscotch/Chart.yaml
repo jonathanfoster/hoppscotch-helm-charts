@@ -1,0 +1,25 @@
+apiVersion: v2
+name: hoppscotch
+description: |-
+  Hoppscotch is a lightweight, web-based API development suite. It was built from the ground up with ease of use and
+  accessibility in mind providing all the functionality needed for developers with minimalist, unobtrusive UI.
+type: application
+icon: https://avatars.githubusercontent.com/u/56705483?s=200&v=4
+home: https://docs.hoppscotch.io
+version: 0.1.0
+appVersion: 2025.7.1
+sources:
+  - https://github.com/hoppscotch/helm-charts/tree/main/charts/hoppscotch
+dependencies:
+  - name: postgresql
+    version: 16.x.x
+    condition: postgresql.enabled
+    repository: oci://registry-1.docker.io/bitnamicharts
+  - name: redis
+    version: 20.x.x
+    condition: redis.enabled
+    repository: oci://registry-1.docker.io/bitnamicharts
+  - name: clickhouse
+    version: 8.x.x
+    condition: clickhouse.enabled
+    repository: oci://registry-1.docker.io/bitnamicharts

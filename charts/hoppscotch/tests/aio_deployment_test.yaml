@@ -1,0 +1,340 @@
+suite: AIO Deployment
+templates:
+  - aio/deployment.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate deployment when deployment mode is aio
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - hasDocuments:
+          count: 1
+
+  - it: should not generate deployment when deployment mode is distributed
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: distributed
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use generated secret when existing secret is not specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: release-name-hoppscotch
+
+  - it: should use existing secret when existing secret is specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      existingSecret: existing-secret
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: existing-secret
+          any: true
+
+  - it: should add extra env vars
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        extraEnvVars:
+          - name: TEST_ENV_VAR
+            value: test
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TEST_ENV_VAR
+            value: test
+          any: true
+
+  - it: should add extra env vars config map reference
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        extraEnvVarsCM: test-config-map
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            configMapRef:
+              name: test-config-map
+          any: true
+
+  - it: should add extra env vars secret reference
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        extraEnvVarsSecret: test-secret
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: test-secret
+          any: true
+
+  - it: should use generated PVC when persistence is enabled
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        persistence:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: release-name-hoppscotch
+          any: true
+
+  - it: should use existing PVC when persistence is enabled and existing PVC specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        persistence:
+          enabled: true
+          existingClaim: existing-pvc
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            persistentVolumeClaim:
+              claimName: existing-pvc
+          any: true
+
+  - it: should use custom liveness probe when specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        customLivenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /healthz
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.port
+          value: 8080
+
+  - it: should generate readiness probe when enabled
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        readinessProbe:
+          enabled: true
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /backend/ping
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.initialDelaySeconds
+          value: 10
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.periodSeconds
+          value: 5
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.timeoutSeconds
+          value: 3
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.successThreshold
+          value: 1
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.failureThreshold
+          value: 3
+
+  - it: should generate readiness probe when enabled with multiport access
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      hoppscotch:
+        frontend:
+          enableSubpathBasedAccess: false
+      aio:
+        readinessProbe:
+          enabled: true
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /ping
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.port
+          value: 3170
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.initialDelaySeconds
+          value: 10
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.periodSeconds
+          value: 5
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.timeoutSeconds
+          value: 3
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.successThreshold
+          value: 1
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.failureThreshold
+          value: 3
+
+  - it: should not generate readiness probe when disabled
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        readinessProbe:
+          enabled: false
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - notContains:
+          path: spec.template.spec.containers[0].readinessProbe
+          content: true
+
+  - it: should use custom readiness probe when specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        customReadinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /healthz
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.port
+          value: 8080
+
+  - it: should use custom startup probe when specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        customStartupProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.httpGet.path
+          value: /healthz
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.httpGet.port
+          value: 8080
+
+  - it: should generate subpath access ports when enabled
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      hoppscotch:
+        frontend:
+          enableSubpathBasedAccess: true
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 80
+
+  - it: should use generate multiport access ports when enabled
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      hoppscotch:
+        frontend:
+          enableSubpathBasedAccess: false
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 3000
+      - equal:
+          path: spec.template.spec.containers[0].ports[1].containerPort
+          value: 3200
+      - equal:
+          path: spec.template.spec.containers[0].ports[2].containerPort
+          value: 3170
+      - equal:
+          path: spec.template.spec.containers[0].ports[3].containerPort
+          value: 3100

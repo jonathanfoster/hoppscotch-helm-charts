@@ -1,0 +1,65 @@
+{{- if and (eq .Values.deploymentMode "distributed") .Values.frontend.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-frontend
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-frontend
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.frontend.ingress.annotations }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.frontend.ingress.annotations }}
+    {{- toYaml .Values.frontend.ingress.annotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  {{- if .Values.frontend.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.frontend.ingress.ingressClassName | quote }}
+  {{- end }}
+  rules:
+    {{- if .Values.frontend.ingress.hostname }}
+    - host: {{ .Values.frontend.ingress.hostname }}
+      http:
+        paths:
+          {{- if .Values.frontend.ingress.extraPaths }}
+          {{- toYaml .Values.frontend.ingress.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.frontend.ingress.path }}
+            pathType: {{ .Values.frontend.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "hoppscotch.fullname" . }}-frontend
+                port:
+                  number: {{ .Values.frontend.service.ports.http }}
+    {{- end }}
+    {{- range .Values.frontend.ingress.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            backend:
+              service:
+                name: {{ include "hoppscotch.fullname" $ }}-frontend
+                port:
+                  number: {{ $.Values.frontend.service.ports.http }}
+    {{- end }}
+    {{- if .Values.frontend.ingress.extraRules }}
+    {{- toYaml .Values.frontend.ingress.extraRules | nindent 4 }}
+    {{- end }}
+  {{- if or (and .Values.frontend.ingress.tls (or (include "hoppscotch.hasCertManagerRequest" ( dict "annotations" .Values.frontend.ingress.annotations )) .Values.frontend.ingress.selfSigned)) .Values.frontend.ingress.extraTls }}
+  tls:
+    {{- if and .Values.frontend.ingress.tls (or (include "hoppscotch.hasCertManagerRequest" ( dict "annotations" .Values.frontend.ingress.annotations )) .Values.frontend.ingress.selfSigned) }}
+    - hosts:
+        - {{ .Values.frontend.ingress.hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.frontend.ingress.hostname }}
+    {{- end }}
+    {{- if .Values.frontend.ingress.extraTls }}
+    {{- .Values.frontend.ingress.extraTls | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

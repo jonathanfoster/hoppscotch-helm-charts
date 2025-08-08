@@ -1,0 +1,45 @@
+suite: Admin PDB
+templates:
+  - admin/deployment.yaml
+  - admin/pdb.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate PDB when deployment mode is distributed and PDB is enabled
+    template: admin/pdb.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        pdb:
+          create: true
+    asserts:
+      - containsDocument:
+          apiVersion: policy/v1
+          kind: PodDisruptionBudget
+      - equal:
+          path: metadata.name
+          value: release-name-hoppscotch-admin
+
+  - it: should not generate PDB when deployment mode is distributed and PDB is disabled
+    template: admin/pdb.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        pdb:
+          create: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not generate PDB when deployment mode is not distributed
+    template: admin/pdb.yaml
+    set:
+      deploymentMode: aio
+      admin:
+        pdb:
+          create: false
+    asserts:
+      - hasDocuments:
+          count: 0

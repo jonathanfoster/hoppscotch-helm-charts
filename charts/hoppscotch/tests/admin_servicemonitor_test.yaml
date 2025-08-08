@@ -1,0 +1,47 @@
+suite: Admin Service Monitor
+templates:
+  - admin/deployment.yaml
+  - admin/servicemonitor.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate ServiceMonitor when deployment mode is distributed and metrics are enabled
+    template: admin/servicemonitor.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        metrics:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: monitoring.coreos.com/v1
+          kind: ServiceMonitor
+      - equal:
+          path: metadata.name
+          value: release-name-hoppscotch-admin
+
+  - it: should not generate ServiceMonitor when deployment mode is distributed and metrics are disabled
+    template: admin/servicemonitor.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        metrics:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not generate ServiceMonitor when deployment mode is not distributed
+    template: admin/servicemonitor.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        metrics:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

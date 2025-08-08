@@ -1,0 +1,151 @@
+{{- if eq .Values.deploymentMode "distributed" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-frontend
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-frontend
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.frontend.autoscaling.enabled }}
+  replicas: {{ .Values.frontend.replicaCount }}
+  {{- end }}
+  {{- if .Values.frontend.updateStrategy }}
+  strategy:
+    {{- toYaml .Values.frontend.updateStrategy | nindent 4 }}
+  {{- else }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hoppscotch-frontend
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/configmap-{{ include "hoppscotch.fullname" . }}: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret-{{ include "hoppscotch.fullname" . }}: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with .Values.frontend.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app.kubernetes.io/component: hoppscotch-frontend
+        {{- include "hoppscotch.labels" . | nindent 8 }}
+        {{- with .Values.frontend.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hoppscotch.serviceAccountName" . }}
+      {{- with .Values.frontend.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: hoppscotch
+          {{- with .Values.frontend.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "hoppscotch.image" (dict "component" .Values.frontend "context" .) }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.frontend.containerPorts.http }}
+              protocol: TCP
+          {{- if .Values.frontend.customLivenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.frontend.customLivenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.frontend.customReadinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.frontend.customReadinessProbe | nindent 12 }}
+          {{- else if .Values.frontend.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.frontend.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.frontend.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.frontend.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.frontend.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.frontend.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.frontend.customStartupProbe }}
+          startupProbe:
+            {{- toYaml .Values.frontend.customStartupProbe | nindent 12 }}
+          {{- end }}
+          {{- $resources := include "hoppscotch.resources" (dict "preset" .Values.frontend.resourcesPreset "resources" .Values.frontend.resources) }}
+          {{- if $resources }}
+          resources:
+            {{- $resources | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.frontend.volumeMounts .Values.frontend.persistence.enabled }}
+          volumeMounts:
+            {{- if .Values.frontend.persistence.enabled }}
+            - name: data
+              mountPath: {{ .Values.frontend.persistence.mountPath }}
+              {{- if .Values.frontend.persistence.subPath }}
+              subPath: {{ .Values.frontend.persistence.subPath }}
+              {{- end }}
+            {{- end }}
+            {{- with .Values.frontend.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.frontend.extraEnvVars }}
+          env:
+            {{- toYaml .Values.frontend.extraEnvVars | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "hoppscotch.fullname" . }}
+            - secretRef:
+                name: {{ include "hoppscotch.secretName" . }}
+            {{- if .Values.frontend.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ .Values.frontend.extraEnvVarsCM }}
+            {{- end }}
+            {{- if .Values.frontend.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ .Values.frontend.extraEnvVarsSecret }}
+            {{- end }}
+      {{- if or .Values.frontend.volumes .Values.frontend.persistence.enabled }}
+      volumes:
+        {{- if .Values.frontend.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            {{- if .Values.frontend.persistence.existingClaim }}
+            claimName: {{ .Values.frontend.persistence.existingClaim }}
+            {{- else }}
+            claimName: {{ include "hoppscotch.fullname" . }}-frontend
+            {{- end }}
+        {{- end }}
+        {{- with .Values.frontend.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.frontend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frontend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frontend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.frontend.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

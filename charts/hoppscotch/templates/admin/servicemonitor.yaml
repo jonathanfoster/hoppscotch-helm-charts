@@ -1,0 +1,51 @@
+{{- if and (eq .Values.deploymentMode "distributed") .Values.admin.metrics.enabled .Values.admin.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-admin
+  namespace: {{ default (include "hoppscotch.namespace" .) .Values.admin.metrics.serviceMonitor.namespace | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-admin
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  jobLabel: {{ .Values.admin.metrics.serviceMonitor.jobLabel | quote }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hoppscotch-admin
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+      {{- if .Values.admin.metrics.serviceMonitor.selector }}
+      {{- toYaml .Values.admin.metrics.serviceMonitor.selector | nindent 6 }}
+      {{- end }}
+  endpoints:
+    - port: metrics
+      path: /metrics
+      {{- if .Values.admin.metrics.serviceMonitor.tlsConfig }}
+      scheme: https
+      tlsConfig:
+        {{- toYaml .Values.admin.metrics.serviceMonitor.tlsConfig | nindent 8 }}
+      {{- end }}
+      {{- if .Values.admin.metrics.serviceMonitor.interval }}
+      interval: {{ .Values.admin.metrics.serviceMonitor.interval }}
+      {{- end }}
+      {{- if .Values.admin.metrics.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ .Values.admin.metrics.serviceMonitor.scrapeTimeout }}
+      {{- end }}
+      {{- if .Values.admin.metrics.serviceMonitor.honorLabels }}
+      honorLabels: {{ .Values.admin.metrics.serviceMonitor.honorLabels }}
+      {{- end }}
+      {{- if .Values.admin.metrics.serviceMonitor.metricsRelabelings }}
+      metricRelabelings:
+        {{- toYaml .Values.admin.metrics.serviceMonitor.metricsRelabelings | nindent 8 }}
+      {{- end }}
+      {{- if .Values.admin.metrics.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml .Values.admin.metrics.serviceMonitor.relabelings | nindent 8 }}
+      {{- end }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "hoppscotch.namespace" . | quote }}
+{{- end }}

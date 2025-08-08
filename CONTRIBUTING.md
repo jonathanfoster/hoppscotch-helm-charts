@@ -1,16 +1,19 @@
 # Contributing to Hoppscotch Charts
 
-Thank you for your interest in contributing to Hoppscotch Charts! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Hoppscotch Charts! This document provides guidelines and instructions for
+contributing to the project.
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to
+uphold this code. Please report unacceptable behavior to the project maintainers.
 
 ## How to Contribute
 
 ### Reporting Bugs
 
-Before creating bug reports, please check the existing issues to avoid duplicates. When you create a bug report, include as many details as possible:
+Before creating bug reports, please check the existing issues to avoid duplicates. When you create a bug report, include
+as many details as possible:
 
 - Use a clear and descriptive title
 - Describe the exact steps to reproduce the problem
@@ -47,21 +50,24 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 ## Development Setup
 
 1. Install required tools:
+
    - Kubernetes cluster (local or cloud)
    - Helm 3.x
    - kubectl
    - Git
 
 2. Clone the repository:
-```bash
-git clone https://github.com/hoppscotch/helm-charts.git
-cd helm-charts
-```
+
+   ```bash
+   git clone https://github.com/hoppscotch/helm-charts.git
+   cd helm-charts
+   ```
 
 3. Create a branch:
-```bash
-git checkout -b feature/your-feature-name
-```
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
 ## Testing
 

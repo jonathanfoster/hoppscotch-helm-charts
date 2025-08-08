@@ -1,0 +1,47 @@
+suite: Backend Service Monitor
+templates:
+  - backend/deployment.yaml
+  - backend/servicemonitor.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate ServiceMonitor when deployment mode is distributed and metrics are enabled
+    template: backend/servicemonitor.yaml
+    set:
+      deploymentMode: distributed
+      backend:
+        metrics:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: monitoring.coreos.com/v1
+          kind: ServiceMonitor
+      - equal:
+          path: metadata.name
+          value: release-name-hoppscotch-backend
+
+  - it: should not generate ServiceMonitor when deployment mode is distributed and metrics are disabled
+    template: backend/servicemonitor.yaml
+    set:
+      deploymentMode: distributed
+      backend:
+        metrics:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not generate ServiceMonitor when deployment mode is not distributed
+    template: backend/servicemonitor.yaml
+    set:
+      deploymentMode: distributed
+      backend:
+        metrics:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

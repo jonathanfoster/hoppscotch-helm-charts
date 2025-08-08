@@ -4,7 +4,8 @@ This document provides general guidelines and best practices for using Hoppscotc
 
 ## Overview
 
-Hoppscotch Charts provides Helm charts for deploying Hoppscotch in Kubernetes environments. These charts are designed to be:
+Hoppscotch Charts provides Helm charts for deploying Hoppscotch in Kubernetes environments. These charts are designed to
+be:
 
 - Enterprise-ready for large-scale deployments
 - Highly performant and resource-efficient
@@ -32,9 +33,9 @@ The repository contains two main chart collections:
    - Community-supported
 
 2. **Hoppscotch Enterprise**
-    - Enhanced features for enterprise use
-    - Additional security and compliance features
-    - Professional support available
+   - Enhanced features for enterprise use
+   - Additional security and compliance features
+   - Professional support available
 
 ## Best Practices
 

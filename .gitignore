@@ -1,1 +1,6 @@
 .cr-release-packages/
+.idea/
+.vscode/
+build/
+charts/*/charts/
+charts/*/tests/__snapshot__/

@@ -1,0 +1,55 @@
+{{- if eq .Values.deploymentMode "distributed" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-frontend
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-frontend
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.frontend.service.annotations }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.frontend.service.annotations }}
+    {{- toYaml .Values.frontend.service.annotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  type: {{ .Values.frontend.service.type }}
+  {{- if and .Values.frontend.service.clusterIP (eq .Values.frontend.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.frontend.service.clusterIP }}
+  {{- end }}
+  {{- if .Values.frontend.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.frontend.service.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.frontend.service.sessionAffinityConfig }}
+  sessionAffinityConfig: {{ .Values.frontend.service.sessionAffinityConfig }}
+  {{- end }}
+  {{- if or (eq .Values.frontend.service.type "LoadBalancer") (eq .Values.frontend.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.frontend.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if and (eq .Values.frontend.service.type "LoadBalancer") (not (empty .Values.frontend.service.loadBalancerSourceRanges)) }}
+  loadBalancerSourceRanges: {{ .Values.frontend.service.loadBalancerSourceRanges }}
+  {{- end }}
+  {{- if and (eq .Values.frontend.service.type "LoadBalancer") (not (empty .Values.frontend.service.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.frontend.service.loadBalancerIP }}
+  {{- end }}
+  ports:
+    - name: http
+      port: {{ .Values.frontend.service.ports.http }}
+      {{- if not (eq .Values.frontend.service.ports.http .Values.frontend.containerPorts.http) }}
+      targetPort: {{ .Values.frontend.containerPorts.http }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.frontend.service.type "NodePort") (eq .Values.frontend.service.type "LoadBalancer")) (not (empty .Values.frontend.service.nodePorts.http)) }}
+      nodePort: {{ .Values.frontend.service.nodePorts.http }}
+      {{- end }}
+    {{- if .Values.frontend.service.extraPorts }}
+    {{- toYaml .Values.frontend.service.extraPorts | nindent 4 }}
+    {{- end }}
+  selector:
+    app.kubernetes.io/component: hoppscotch-frontend
+    {{- include "hoppscotch.selectorLabels" . | nindent 4 }}
+{{- end }}

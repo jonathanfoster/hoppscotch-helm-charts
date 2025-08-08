@@ -1,0 +1,28 @@
+suite: Backend Service
+templates:
+  - backend/deployment.yaml
+  - backend/service.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate service when deployment mode is distributed
+    template: backend/service.yaml
+    set:
+      deploymentMode: distributed
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: Service
+      - equal:
+          path: metadata.name
+          value: release-name-hoppscotch-backend
+
+  - it: should not generate service when deployment mode is not distributed
+    template: backend/service.yaml
+    set:
+      deploymentMode: aio
+    asserts:
+      - hasDocuments:
+          count: 0

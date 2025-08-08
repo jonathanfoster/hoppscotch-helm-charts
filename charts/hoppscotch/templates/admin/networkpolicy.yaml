@@ -1,0 +1,68 @@
+{{- if and (eq .Values.deploymentMode "distributed") .Values.admin.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-admin
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-admin
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  policyTypes:
+    - Ingress
+    - Egress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: hoppscotch-admin
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+  egress:
+    {{- if .Values.admin.networkPolicy.allowExternalEgress }}
+    - {}
+    {{- else }}
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    {{- if .Values.admin.networkPolicy.extraEgress }}
+    {{- toYaml .Values.admin.networkPolicy.extraEgress | nindent 4 }}
+    {{- end }}
+    {{- end }}
+  ingress:
+    - ports:
+        - port: {{ .Values.admin.containerPorts.http }}
+        - port: {{ .Values.admin.containerPorts.https }}
+      {{- if not .Values.admin.networkPolicy.allowExternal }}
+      from:
+        - podSelector:
+            matchLabels:
+              {{- include "hoppscotch.selectorLabels" . | nindent 14 }}
+        {{- if .Values.admin.networkPolicy.addExternalClientAccess }}
+        - podSelector:
+            matchLabels:
+              {{ include "hoppscotch.fullname" . }}-client: "true"
+        {{- end }}
+        {{- if .Values.admin.networkPolicy.ingressPodMatchLabels }}
+        - podSelector:
+            matchLabels:
+              {{- .Values.admin.networkPolicy.ingressPodMatchLabels | nindent 14 }}
+        {{- end }}
+        {{- if .Values.admin.networkPolicy.ingressNSMatchLabels }}
+        - namespaceSelector:
+            matchLabels:
+              {{- .Values.admin.networkPolicy.ingressNSMatchLabels | nindent 14 }}
+          {{- if .Values.admin.networkPolicy.ingressNSPodMatchLabels }}
+          podSelector:
+            matchLabels:
+              {{- .Values.admin.networkPolicy.ingressNSPodMatchLabels | nindent 14 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- if .Values.admin.networkPolicy.extraIngress }}
+    {{- toYaml .Values.admin.networkPolicy.extraIngress | nindent 4 }}
+    {{- end }}
+{{- end }}

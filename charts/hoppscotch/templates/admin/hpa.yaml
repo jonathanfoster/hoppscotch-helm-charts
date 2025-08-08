@@ -1,0 +1,38 @@
+{{- if and (eq .Values.deploymentMode "distributed") .Values.admin.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-admin
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-admin
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "hoppscotch.fullname" . }}-admin
+  minReplicas: {{ .Values.admin.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.admin.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.admin.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.admin.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.admin.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.admin.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

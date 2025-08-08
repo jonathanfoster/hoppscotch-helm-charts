@@ -1,0 +1,59 @@
+{{- if .Values.migrations.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-migrations-%d" (include "hoppscotch.fullname" .) .Release.Revision | trunc 63 }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-migrations
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: hoppscotch-migrations
+        {{- include "hoppscotch.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: OnFailure
+      {{- if or .Values.defaultInitContainers.waitForDatabase }}
+      initContainers:
+        {{- include "hoppscotch.defaultInitContainers.waitForDatabase" . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: hoppscotch-migrations
+          image: {{ include "hoppscotch.backend.image" . }}
+          imagePullPolicy: {{ include "hoppscotch.backend.imagePullPolicy" . }}
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - ./node_modules/.bin/prisma migrate deploy
+          {{- if .Values.migrations.extraEnvVars }}
+          env:
+            {{- toYaml .Values.migrations.extraEnvVars | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ include "hoppscotch.secretName" . }}
+            {{- if .Values.migrations.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ .Values.migrations.extraEnvVarsCM }}
+            {{- end }}
+            {{- if .Values.migrations.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ .Values.migrations.extraEnvVarsSecret }}
+            {{- end }}
+          {{- $resources := include "hoppscotch.resources" (dict "preset" .Values.migrations.resourcesPreset "resources" .Values.migrations.resources) }}
+          {{- if $resources }}
+          resources:
+            {{- $resources | nindent 12 }}
+          {{- end }}
+{{- end }}

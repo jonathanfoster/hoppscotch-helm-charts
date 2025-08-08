@@ -200,9 +200,9 @@ service:
   name: hoppscotch-enterprise
   app: hoppscotch-enterprise
   # Dynamically set based on ingress
-  type: "{{ .Values.service.ingress.enabled | ternary \"ClusterIP\" \"LoadBalancer\" }}"
+  type: '{{ .Values.service.ingress.enabled | ternary "ClusterIP" "LoadBalancer" }}'
   # Only set externalTrafficPolicy for LoadBalancer
-  externalTrafficPolicy: "{{ .Values.service.ingress.enabled | ternary \"\" \"Cluster\" }}"
+  externalTrafficPolicy: '{{ .Values.service.ingress.enabled | ternary "" "Cluster" }}'
 
   ports:
     backend:
@@ -243,7 +243,7 @@ service:
       # alb.ingress.kubernetes.io/security-groups: "sg-12345678"
       # alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region:account-id:certificate/cert-id"
 
-  annotations:  # Define service annotations here if needed. For example, to configure a load balancer:
+  annotations: # Define service annotations here if needed. For example, to configure a load balancer:
     example.com/dummy: ""
     # service.kubernetes.io/load-balancer-type: "External"
 

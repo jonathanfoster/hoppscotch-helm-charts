@@ -1,0 +1,237 @@
+suite: Admin Deployment
+templates:
+  - admin/deployment.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate deployment when deployment mode is distributed
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - hasDocuments:
+          count: 1
+
+  - it: should not generate deployment when deployment mode is aio
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: aio
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use generated secret when existing secret is not specified
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: release-name-hoppscotch
+
+  - it: should use existing secret when existing secret is specified
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+      existingSecret: existing-secret
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: existing-secret
+          any: true
+
+  - it: should add extra env vars
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        extraEnvVars:
+          - name: TEST_ENV_VAR
+            value: test
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TEST_ENV_VAR
+            value: test
+          any: true
+
+  - it: should add extra env vars config map reference
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        extraEnvVarsCM: test-config-map
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            configMapRef:
+              name: test-config-map
+          any: true
+
+  - it: should add extra env vars secret reference
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        extraEnvVarsSecret: test-secret
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: test-secret
+          any: true
+
+  - it: should use generated PVC when persistence is enabled
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        persistence:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: release-name-hoppscotch-admin
+          any: true
+
+  - it: should use existing PVC when persistence is enabled and existing PVC specified
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        persistence:
+          enabled: true
+          existingClaim: existing-pvc
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            persistentVolumeClaim:
+              claimName: existing-pvc
+          any: true
+
+  - it: should generate readiness probe when enabled
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        readinessProbe:
+          enabled: true
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.initialDelaySeconds
+          value: 10
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.periodSeconds
+          value: 5
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.timeoutSeconds
+          value: 3
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.successThreshold
+          value: 1
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.failureThreshold
+          value: 3
+
+  - it: should not generate readiness probe when disabled
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        readinessProbe:
+          enabled: false
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - notContains:
+          path: spec.template.spec.containers[0].readinessProbe
+          content: true
+
+  - it: should use custom readiness probe when specified
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        customReadinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /healthz
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.port
+          value: 8080
+
+  - it: should use custom startup probe when specified
+    template: admin/deployment.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        customStartupProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.httpGet.path
+          value: /healthz
+      - equal:
+          path: spec.template.spec.containers[0].startupProbe.httpGet.port
+          value: 8080

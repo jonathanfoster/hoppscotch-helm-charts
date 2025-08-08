@@ -1,3 +1,4 @@
+<!-- markdownlint-disable first-line-h1 no-duplicate-heading no-inline-html -->
 <div align="center">
   <h3>
     <b>
@@ -9,7 +10,9 @@
   </b>
   <p>
 
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen?logo=github)](CODE_OF_CONDUCT.md) [![Website](https://img.shields.io/website?url=https%3A%2F%2Fhoppscotch.io&logo=hoppscotch)](https://hoppscotch.io) [![Tweet](https://img.shields.io/twitter/url?url=https%3A%2F%2Fhoppscotch.io%2F)](https://twitter.com/share?text=%F0%9F%91%BD%20Hoppscotch%20%E2%80%A2%20Open%20source%20API%20development%20ecosystem%20-%20Helps%20you%20create%20requests%20faster,%20saving%20precious%20time%20on%20development.&url=https://hoppscotch.io&hashtags=hoppscotch&via=hoppscotch_io)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen?logo=github)](CODE_OF_CONDUCT.md)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fhoppscotch.io&logo=hoppscotch)](https://hoppscotch.io)
+[![Tweet](https://img.shields.io/twitter/url?url=https%3A%2F%2Fhoppscotch.io%2F)](https://twitter.com/share?text=%F0%9F%91%BD%20Hoppscotch%20%E2%80%A2%20Open%20source%20API%20development%20ecosystem%20-%20Helps%20you%20create%20requests%20faster,%20saving%20precious%20time%20on%20development.&url=https://hoppscotch.io&hashtags=hoppscotch&via=hoppscotch_io)
 
   </p>
   <p>
@@ -24,7 +27,8 @@
 
 #### **Support**
 
-[![Chat on Discord](https://img.shields.io/badge/chat-Discord-7289DA?logo=discord)](https://hoppscotch.io/discord) [![Chat on Telegram](https://img.shields.io/badge/chat-Telegram-2CA5E0?logo=telegram)](https://hoppscotch.io/telegram)
+[![Chat on Discord](https://img.shields.io/badge/chat-Discord-7289DA?logo=discord)](https://hoppscotch.io/discord)
+[![Chat on Telegram](https://img.shields.io/badge/chat-Telegram-2CA5E0?logo=telegram)](https://hoppscotch.io/telegram)
 
 ### **Features**
 
@@ -117,9 +121,11 @@ Our application uses Helm for package management in Kubernetes. Helm Charts help
 
 ## **Contributing**
 
-Please contribute using [GitHub Flow](https://guides.github.com/introduction/flow). Create a branch, add commits, and [open a pull request](https://github.com/hoppscotch/helm-charts/compare).
+Please contribute using [GitHub Flow](https://guides.github.com/introduction/flow). Create a branch, add commits, and
+[open a pull request](https://github.com/hoppscotch/helm-charts/compare).
 
-Please read [`CONTRIBUTING`](CONTRIBUTING.md) for details on our [`CODE OF CONDUCT`](CODE_OF_CONDUCT.md), and the process for submitting pull requests to us.
+Please read [`CONTRIBUTING`](CONTRIBUTING.md) for details on our [`CODE OF CONDUCT`](CODE_OF_CONDUCT.md), and the
+process for submitting pull requests to us.
 
 ## **Continuous Integration**
 
@@ -127,7 +133,8 @@ We use [GitHub Actions](https://github.com/features/actions) for continuous inte
 
 ## **Authors**
 
-This project owes its existence to the collective efforts of all those who contribute — [contribute now](CONTRIBUTING.md).
+This project owes its existence to the collective efforts of all those who contribute —
+[contribute now](CONTRIBUTING.md).
 
 <div align="center">
   <a href="https://github.com/hoppscotch/helm-charts/graphs/contributors">
@@ -139,4 +146,5 @@ This project owes its existence to the collective efforts of all those who contr
 
 ## **License**
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT) — see the [`LICENSE`](LICENSE) file for details.
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT) — see the [`LICENSE`](LICENSE)
+file for details.

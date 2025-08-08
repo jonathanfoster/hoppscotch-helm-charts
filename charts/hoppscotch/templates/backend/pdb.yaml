@@ -1,0 +1,25 @@
+{{- if and (eq .Values.deploymentMode "distributed") .Values.backend.pdb.create }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-backend
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-backend
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.backend.pdb.minAvailable }}
+  minAvailable: {{ .Values.backend.pdb.minAvailable }}
+  {{- end  }}
+  {{- if or .Values.backend.pdb.maxUnavailable ( not .Values.backend.pdb.minAvailable ) }}
+  maxUnavailable: {{ .Values.backend.pdb.maxUnavailable | default 1 }}
+  {{- end  }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hoppscotch-backend
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+{{- end }}

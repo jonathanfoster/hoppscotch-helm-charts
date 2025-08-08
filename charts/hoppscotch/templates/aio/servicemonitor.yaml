@@ -1,0 +1,51 @@
+{{- if and (eq .Values.deploymentMode "aio") .Values.aio.metrics.enabled .Values.aio.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}
+  namespace: {{ default (include "hoppscotch.namespace" .) .Values.aio.metrics.serviceMonitor.namespace | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  jobLabel: {{ .Values.aio.metrics.serviceMonitor.jobLabel | quote }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hoppscotch
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+      {{- if .Values.aio.metrics.serviceMonitor.selector }}
+      {{- toYaml .Values.aio.metrics.serviceMonitor.selector | nindent 6 }}
+      {{- end }}
+  endpoints:
+    - port: metrics
+      path: /metrics
+      {{- if .Values.aio.metrics.serviceMonitor.tlsConfig }}
+      scheme: https
+      tlsConfig:
+        {{- toYaml .Values.aio.metrics.serviceMonitor.tlsConfig | nindent 8 }}
+      {{- end }}
+      {{- if .Values.aio.metrics.serviceMonitor.interval }}
+      interval: {{ .Values.aio.metrics.serviceMonitor.interval }}
+      {{- end }}
+      {{- if .Values.aio.metrics.serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ .Values.aio.metrics.serviceMonitor.scrapeTimeout }}
+      {{- end }}
+      {{- if .Values.aio.metrics.serviceMonitor.honorLabels }}
+      honorLabels: {{ .Values.aio.metrics.serviceMonitor.honorLabels }}
+      {{- end }}
+      {{- if .Values.aio.metrics.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml .Values.aio.metrics.serviceMonitor.metricsRelabelings | nindent 8 }}
+      {{- end }}
+      {{- if .Values.aio.metrics.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml .Values.aio.metrics.serviceMonitor.relabelings | nindent 8 }}
+      {{- end }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "hoppscotch.namespace" . | quote }}
+{{- end }}

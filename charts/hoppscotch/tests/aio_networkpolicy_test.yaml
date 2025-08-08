@@ -1,0 +1,45 @@
+suite: AIO Network Policy
+templates:
+  - aio/networkpolicy.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - secrets.yaml
+  - service.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate network policy when deployment mode is aio and network policy is enabled
+    template: aio/networkpolicy.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        networkPolicy:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+      - hasDocuments:
+          count: 1
+
+  - it: should not generate network policy when deployment mode is aio and network policy is disabled
+    template: aio/networkpolicy.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        networkPolicy:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not generate network policy when deployment mode is not aio
+    template: aio/networkpolicy.yaml
+    set:
+      deploymentMode: distributed
+      aio:
+        networkPolicy:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

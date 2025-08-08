@@ -1,0 +1,95 @@
+suite: Resources Presets
+templates:
+  - aio/deployment.yaml
+  - configmap.yaml
+  - secrets.yaml
+tests:
+  - it: should apply nano resource preset by default
+    template: aio/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: "150m"
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: "192Mi"
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: "100m"
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: "128Mi"
+
+  - it: should apply medium resource preset when specified
+    template: aio/deployment.yaml
+    set:
+      aio:
+        resourcesPreset: medium
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: "1000m"
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: "1Gi"
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: "500m"
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: "512Mi"
+
+  - it: should apply large resource preset when specified
+    template: aio/deployment.yaml
+    set:
+      aio:
+        resourcesPreset: large
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: "2000m"
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: "2Gi"
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: "1000m"
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: "1Gi"
+
+  - it: should override preset with custom resources
+    template: aio/deployment.yaml
+    set:
+      aio:
+        resourcesPreset: large
+        resources:
+          limits:
+            cpu: 4000m
+            memory: 4Gi
+          requests:
+            cpu: 2000m
+            memory: 2Gi
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.cpu
+          value: "4000m"
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits.memory
+          value: "4Gi"
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: "2000m"
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.memory
+          value: "2Gi"
+
+  - it: should not set resources when empty preset and no custom resources
+    template: aio/deployment.yaml
+    set:
+      aio:
+        resourcesPreset: ""
+        resources: {}
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].resources

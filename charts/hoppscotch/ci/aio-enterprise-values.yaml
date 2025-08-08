@@ -1,0 +1,25 @@
+deploymentMode: aio
+hoppscotch:
+  backend:
+    enterpriseLicenseKey: your-enterprise-license-key
+aio:
+  image:
+    repository: hoppscotch/hoppscotch-enterprise
+  ingress:
+    enabled: true
+    hostname: hoppscotch.local
+    tls: true
+    selfSigned: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+postgresql:
+  enabled: true
+  auth:
+    username: hoppscotch
+    password: hoppscotch
+    database: hoppscotch
+  primary:
+    persistentVolumeClaimRetentionPolicy:
+      enabled: true
+      whenDeleted: Delete
