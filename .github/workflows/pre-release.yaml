@@ -1,0 +1,32 @@
+name: Pre-release chart
+on:
+  push:
+    tags:
+      - '*-[0-9]+.[0-9]+.[0-9]+-*'
+jobs:
+  pre-release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+      - name: Update chart version
+        run: |
+          tag=${GITHUB_REF#refs/tags/}
+          chart_name=$(echo "${tag}" | sed -E 's/^(.*)-[0-9]+\.[0-9]+\.[0-9]+-.*$/\1/')
+          chart_version=$(echo "${tag}" | sed -E 's/^.*-([0-9]+\.[0-9]+\.[0-9]+-.*)$/\1/')
+          yq eval -i ".version = \"${chart_version}\"" charts/${chart_name}/Chart.yaml
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.7.0
+        env:
+          CR_GENERATE_RELEASE_NOTES: true
+          CR_MAKE_RELEASE_LATEST: false
+          CR_SKIP_EXISTING: true
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

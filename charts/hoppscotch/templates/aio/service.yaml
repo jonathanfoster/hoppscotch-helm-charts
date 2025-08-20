@@ -1,0 +1,94 @@
+{{- if eq .Values.deploymentMode "aio" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.aio.service.annotations }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.aio.service.annotations }}
+    {{- toYaml .Values.aio.service.annotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  type: {{ .Values.aio.service.type }}
+  {{- if and .Values.aio.service.clusterIP (eq .Values.aio.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.aio.service.clusterIP }}
+  {{- end }}
+  {{- if .Values.aio.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.aio.service.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.aio.service.sessionAffinityConfig }}
+  sessionAffinityConfig: {{ .Values.aio.service.sessionAffinityConfig }}
+  {{- end }}
+  {{- if or (eq .Values.aio.service.type "LoadBalancer") (eq .Values.aio.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.aio.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if and (eq .Values.aio.service.type "LoadBalancer") (not (empty .Values.aio.service.loadBalancerSourceRanges)) }}
+  loadBalancerSourceRanges: {{ .Values.aio.service.loadBalancerSourceRanges }}
+  {{- end }}
+  {{- if and (eq .Values.aio.service.type "LoadBalancer") (not (empty .Values.aio.service.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.aio.service.loadBalancerIP }}
+  {{- end }}
+  ports:
+  {{- if .Values.hoppscotch.frontend.enableSubpathBasedAccess }}
+    - name: http
+      port: {{ .Values.aio.service.ports.http }}
+      {{- if not (eq .Values.aio.service.ports.http .Values.aio.containerPorts.http) }}
+      targetPort: {{ .Values.aio.containerPorts.http }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.aio.service.type "NodePort") (eq .Values.aio.service.type "LoadBalancer")) (not (empty .Values.aio.service.nodePorts.http)) }}
+      nodePort: {{ .Values.aio.service.nodePorts.http }}
+      {{- end }}
+  {{- else }}
+    - name: http-frontend
+      port: {{ .Values.aio.service.ports.frontend }}
+      {{- if not (eq .Values.aio.service.ports.frontend .Values.aio.containerPorts.frontend) }}
+      targetPort: {{ .Values.aio.containerPorts.frontend }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.aio.service.type "NodePort") (eq .Values.aio.service.type "LoadBalancer")) (not (empty .Values.aio.service.nodePorts.frontend)) }}
+      nodePort: {{ .Values.aio.service.nodePorts.frontend }}
+      {{- end }}
+    - name: http-desktop
+      port: {{ .Values.aio.service.ports.desktop }}
+      {{- if not (eq .Values.aio.service.ports.desktop .Values.aio.containerPorts.desktop) }}
+      targetPort: {{ .Values.aio.containerPorts.desktop }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.aio.service.type "NodePort") (eq .Values.aio.service.type "LoadBalancer")) (not (empty .Values.aio.service.nodePorts.desktop)) }}
+      nodePort: {{ .Values.aio.service.nodePorts.desktop }}
+      {{- end }}
+    - name: http-backend
+      port: {{ .Values.aio.service.ports.backend }}
+      {{- if not (eq .Values.aio.service.ports.backend .Values.aio.containerPorts.backend) }}
+      targetPort: {{ .Values.aio.containerPorts.backend }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.aio.service.type "NodePort") (eq .Values.aio.service.type "LoadBalancer")) (not (empty .Values.aio.service.nodePorts.backend)) }}
+      nodePort: {{ .Values.aio.service.nodePorts.backend }}
+      {{- end }}
+    - name: http-admin
+      port: {{ .Values.aio.service.ports.admin }}
+      {{- if not (eq .Values.aio.service.ports.admin .Values.aio.containerPorts.admin) }}
+      targetPort: {{ .Values.aio.containerPorts.admin }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.aio.service.type "NodePort") (eq .Values.aio.service.type "LoadBalancer")) (not (empty .Values.aio.service.nodePorts.admin)) }}
+      nodePort: {{ .Values.aio.service.nodePorts.admin }}
+      {{- end }}
+  {{- end }}
+    {{- if .Values.aio.service.extraPorts }}
+    {{- toYaml .Values.aio.service.extraPorts | nindent 4 }}
+    {{- end }}
+  selector:
+    app.kubernetes.io/component: hoppscotch
+    {{- include "hoppscotch.selectorLabels" . | nindent 4 }}
+{{- end }}

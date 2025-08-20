@@ -1,0 +1,44 @@
+{{- if and (eq .Values.deploymentMode "distributed") .Values.admin.persistence.enabled (not .Values.admin.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-admin
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-admin
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.admin.persistence.annotations }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.admin.persistence.annotations }}
+    {{- toYaml .Values.admin.persistence.annotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.admin.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.admin.persistence.size | quote }}
+  {{- if .Values.admin.persistence.storageClass }}
+  {{- if (eq "-" .Values.admin.persistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ .Values.admin.persistence.storageClass | quote }}
+  {{- end }}
+  {{- else if .Values.global.defaultStorageClass }}
+  storageClassName: {{ .Values.global.defaultStorageClass | quote }}
+  {{- end }}
+  {{- if .Values.admin.persistence.selector }}
+  selector:
+    {{- toYaml .Values.admin.persistence.selector | nindent 4 }}
+  {{- end }}
+  {{- if .Values.admin.persistence.dataSource }}
+  dataSource:
+    {{- toYaml .Values.admin.persistence.dataSource | nindent 4 }}
+  {{- end }}
+{{- end }}

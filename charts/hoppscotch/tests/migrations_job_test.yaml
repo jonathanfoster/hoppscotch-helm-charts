@@ -1,0 +1,140 @@
+suite: Migrations Job
+templates:
+  - migrations/job.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should exist when migrations are enabled
+    template: migrations/job.yaml
+    set:
+      migrations:
+        enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: batch/v1
+          kind: Job
+      - equal:
+          path: metadata.name
+          value: release-name-hoppscotch-migrations-0
+
+  - it: should not exist when migrations are disabled
+    template: migrations/job.yaml
+    set:
+      migrations:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should add extra env vars
+    template: migrations/job.yaml
+    set:
+      migrations:
+        enabled: true
+        extraEnvVars:
+          - name: TEST_ENV_VAR
+            value: test
+    asserts:
+      - containsDocument:
+          apiVersion: batch/v1
+          kind: Job
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TEST_ENV_VAR
+            value: test
+          any: true
+
+  - it: should add extra env vars config map reference
+    template: migrations/job.yaml
+    set:
+      migrations:
+        enabled: true
+        extraEnvVarsCM: test-config-map
+    asserts:
+      - containsDocument:
+          apiVersion: batch/v1
+          kind: Job
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            configMapRef:
+              name: test-config-map
+          any: true
+
+  - it: should add extra env vars secret reference
+    template: migrations/job.yaml
+    set:
+      migrations:
+        enabled: true
+        extraEnvVarsSecret: test-secret
+    asserts:
+      - containsDocument:
+          apiVersion: batch/v1
+          kind: Job
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: test-secret
+          any: true
+
+  - it: should use aio image when deployment mode is aio
+    template: migrations/job.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        image:
+          repository: hoppscotch/hoppscotch
+          pullPolicy: IfNotPresent
+          tag: latest
+      migrations:
+        enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: batch/v1
+          kind: Job
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            image: hoppscotch/hoppscotch:latest
+            imagePullPolicy: IfNotPresent
+          any: true
+
+  - it: should use backend image when deployment mode is not aio
+    template: migrations/job.yaml
+    set:
+      deploymentMode: distributed
+      backend:
+        image:
+          repository: hoppscotch/hoppscotch-backend
+          pullPolicy: IfNotPresent
+          tag: latest
+      migrations:
+        enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: batch/v1
+          kind: Job
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            image: hoppscotch/hoppscotch-backend:latest
+            imagePullPolicy: IfNotPresent
+          any: true
+
+  - it: should append the release revision to the job name
+    template: migrations/job.yaml
+    release:
+      revision: 1
+    set:
+      migrations:
+        enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: batch/v1
+          kind: Job
+      - equal:
+          path: metadata.name
+          value: release-name-hoppscotch-migrations-1

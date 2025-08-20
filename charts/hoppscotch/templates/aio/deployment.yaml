@@ -1,0 +1,175 @@
+{{- if eq .Values.deploymentMode "aio" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.aio.autoscaling.enabled }}
+  replicas: {{ .Values.aio.replicaCount }}
+  {{- end }}
+  {{- if .Values.aio.updateStrategy }}
+  strategy:
+    {{- toYaml .Values.aio.updateStrategy | nindent 4 }}
+  {{- else }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hoppscotch
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/configmap-{{ include "hoppscotch.fullname" . }}: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret-{{ include "hoppscotch.fullname" . }}: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with .Values.aio.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app.kubernetes.io/component: hoppscotch
+        {{- include "hoppscotch.labels" . | nindent 8 }}
+        {{- with .Values.aio.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hoppscotch.serviceAccountName" . }}
+      {{- with .Values.aio.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: hoppscotch
+          {{- with .Values.aio.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "hoppscotch.image" (dict "component" .Values.aio "context" .) }}
+          imagePullPolicy: {{ .Values.aio.image.pullPolicy }}
+          ports:
+          {{- if .Values.hoppscotch.frontend.enableSubpathBasedAccess }}
+            - name: http
+              containerPort: {{ .Values.aio.containerPorts.http }}
+              protocol: TCP
+          {{- else }}
+            - name: http-frontend
+              containerPort: {{ .Values.aio.containerPorts.frontend }}
+              protocol: TCP
+            - name: http-desktop
+              containerPort: {{ .Values.aio.containerPorts.desktop }}
+              protocol: TCP
+            - name: http-backend
+              containerPort: {{ .Values.aio.containerPorts.backend }}
+              protocol: TCP
+            - name: http-admin
+              containerPort: {{ .Values.aio.containerPorts.admin }}
+              protocol: TCP
+          {{- end }}
+          {{- if .Values.aio.customLivenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.aio.customLivenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.aio.customReadinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.aio.customReadinessProbe | nindent 12 }}
+          {{- else if .Values.aio.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.hoppscotch.frontend.enableSubpathBasedAccess | ternary "/backend/ping" "/ping" }}
+              port: {{ .Values.hoppscotch.frontend.enableSubpathBasedAccess | ternary "http" 3170 }}
+            initialDelaySeconds: {{ .Values.aio.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.aio.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.aio.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.aio.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.aio.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.aio.customStartupProbe }}
+          startupProbe:
+            {{- toYaml .Values.aio.customStartupProbe | nindent 12 }}
+          {{- end }}
+          {{- $resources := include "hoppscotch.resources" (dict "preset" .Values.aio.resourcesPreset "resources" .Values.aio.resources) }}
+          {{- if $resources }}
+          resources:
+            {{- $resources | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.aio.volumeMounts .Values.aio.persistence.enabled }}
+          volumeMounts:
+            {{- if .Values.aio.persistence.enabled }}
+            - name: data
+              mountPath: {{ .Values.aio.persistence.mountPath }}
+              {{- if .Values.aio.persistence.subPath }}
+              subPath: {{ .Values.aio.persistence.subPath }}
+              {{- end }}
+            {{- end }}
+            {{- with .Values.aio.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.aio.extraEnvVars }}
+          env:
+            {{- toYaml .Values.aio.extraEnvVars | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "hoppscotch.fullname" . }}
+            - secretRef:
+                name: {{ include "hoppscotch.secretName" . }}
+            {{- if .Values.aio.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ .Values.aio.extraEnvVarsCM }}
+            {{- end }}
+            {{- if .Values.aio.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ .Values.aio.extraEnvVarsSecret }}
+            {{- end }}
+      {{- if or .Values.defaultInitContainers.waitForDatabase .Values.defaultInitContainers.waitForMigrations }}
+      initContainers:
+        {{- if .Values.defaultInitContainers.waitForDatabase.enabled }}
+        {{- include "hoppscotch.defaultInitContainers.waitForDatabase" . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.defaultInitContainers.waitForMigrations.enabled }}
+        {{- include "hoppscotch.defaultInitContainers.waitForMigrations" . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- if or .Values.aio.volumes .Values.aio.persistence.enabled }}
+      volumes:
+        {{- if .Values.aio.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            {{- if .Values.aio.persistence.existingClaim }}
+            claimName: {{ .Values.aio.persistence.existingClaim }}
+            {{- else }}
+            claimName: {{ include "hoppscotch.fullname" . }}
+            {{- end }}
+        {{- end }}
+        {{- with .Values.aio.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.aio.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.aio.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.aio.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.aio.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

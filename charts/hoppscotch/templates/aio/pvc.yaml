@@ -1,0 +1,44 @@
+{{- if and (eq .Values.deploymentMode "aio") .Values.aio.persistence.enabled (not .Values.aio.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.aio.persistence.annotations }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.aio.persistence.annotations }}
+    {{- toYaml .Values.aio.persistence.annotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.aio.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.aio.persistence.size | quote }}
+  {{- if .Values.aio.persistence.storageClass }}
+  {{- if (eq "-" .Values.aio.persistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ .Values.aio.persistence.storageClass | quote }}
+  {{- end }}
+  {{- else if .Values.global.defaultStorageClass }}
+  storageClassName: {{ .Values.global.defaultStorageClass | quote }}
+  {{- end }}
+  {{- if .Values.aio.persistence.selector }}
+  selector:
+    {{- toYaml .Values.aio.persistence.selector | nindent 4 }}
+  {{- end }}
+  {{- if .Values.aio.persistence.dataSource }}
+  dataSource:
+    {{- toYaml .Values.aio.persistence.dataSource | nindent 4 }}
+  {{- end }}
+{{- end }}

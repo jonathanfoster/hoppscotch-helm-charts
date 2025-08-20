@@ -1,0 +1,57 @@
+suite: AIO PVC
+templates:
+  - aio/deployment.yaml
+  - aio/pvc.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate PVC when deployment mode is aio and persistence is enabled
+    template: aio/pvc.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        persistence:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+      - equal:
+          path: metadata.name
+          value: release-name-hoppscotch
+
+  - it: should not generate PVC when deployment mode is aio and persistence is disabled
+    template: aio/pvc.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        persistence:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not generate PVC when deployment mode is aio and existing claim is set
+    template: aio/pvc.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        persistence:
+          enabled: true
+          existingClaim: my-existing-claim
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not generate PVC when deployment mode is not aio
+    template: aio/pvc.yaml
+    set:
+      deploymentMode: distributed
+      aio:
+        persistence:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

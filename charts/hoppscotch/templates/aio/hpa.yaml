@@ -1,0 +1,38 @@
+{{- if and (eq .Values.deploymentMode "aio") .Values.aio.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "hoppscotch.fullname" . }}
+  minReplicas: {{ .Values.aio.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.aio.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.aio.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.aio.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.aio.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.aio.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

@@ -1,0 +1,55 @@
+{{- if eq .Values.deploymentMode "distributed" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-admin
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-admin
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.admin.service.annotations }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.admin.service.annotations }}
+    {{- toYaml .Values.admin.service.annotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  type: {{ .Values.admin.service.type }}
+  {{- if and .Values.admin.service.clusterIP (eq .Values.admin.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.admin.service.clusterIP }}
+  {{- end }}
+  {{- if .Values.admin.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.admin.service.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.admin.service.sessionAffinityConfig }}
+  sessionAffinityConfig: {{ .Values.admin.service.sessionAffinityConfig }}
+  {{- end }}
+  {{- if or (eq .Values.admin.service.type "LoadBalancer") (eq .Values.admin.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.admin.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if and (eq .Values.admin.service.type "LoadBalancer") (not (empty .Values.admin.service.loadBalancerSourceRanges)) }}
+  loadBalancerSourceRanges: {{ .Values.admin.service.loadBalancerSourceRanges }}
+  {{- end }}
+  {{- if and (eq .Values.admin.service.type "LoadBalancer") (not (empty .Values.admin.service.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.admin.service.loadBalancerIP }}
+  {{- end }}
+  ports:
+    - name: http
+      port: {{ .Values.admin.service.ports.http }}
+      {{- if not (eq .Values.admin.service.ports.http .Values.admin.containerPorts.http) }}
+      targetPort: {{ .Values.admin.containerPorts.http }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.admin.service.type "NodePort") (eq .Values.admin.service.type "LoadBalancer")) (not (empty .Values.admin.service.nodePorts.http)) }}
+      nodePort: {{ .Values.admin.service.nodePorts.http }}
+      {{- end }}
+    {{- if .Values.admin.service.extraPorts }}
+    {{- toYaml .Values.admin.service.extraPorts | nindent 4 }}
+    {{- end }}
+  selector:
+    app.kubernetes.io/component: hoppscotch-admin
+    {{- include "hoppscotch.selectorLabels" . | nindent 4 }}
+{{- end }}

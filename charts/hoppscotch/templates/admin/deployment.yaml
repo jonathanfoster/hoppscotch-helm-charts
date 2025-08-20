@@ -1,0 +1,151 @@
+{{- if eq .Values.deploymentMode "distributed" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-admin
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-admin
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.admin.autoscaling.enabled }}
+  replicas: {{ .Values.admin.replicaCount }}
+  {{- end }}
+  {{- if .Values.admin.updateStrategy }}
+  strategy:
+    {{- toYaml .Values.admin.updateStrategy | nindent 4 }}
+  {{- else }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hoppscotch-admin
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/configmap-{{ include "hoppscotch.fullname" . }}: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret-{{ include "hoppscotch.fullname" . }}: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with .Values.admin.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app.kubernetes.io/component: hoppscotch-admin
+        {{- include "hoppscotch.labels" . | nindent 8 }}
+        {{- with .Values.admin.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hoppscotch.serviceAccountName" . }}
+      {{- with .Values.admin.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: hoppscotch
+          {{- with .Values.admin.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "hoppscotch.image" (dict "component" .Values.admin "context" .) }}
+          imagePullPolicy: {{ .Values.admin.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.admin.containerPorts.http }}
+              protocol: TCP
+          {{- if .Values.admin.customLivenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.admin.customLivenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.admin.customReadinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.admin.customReadinessProbe | nindent 12 }}
+          {{- else if .Values.admin.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.admin.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.admin.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.admin.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.admin.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.admin.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.admin.customStartupProbe }}
+          startupProbe:
+            {{- toYaml .Values.admin.customStartupProbe | nindent 12 }}
+          {{- end }}
+          {{- $resources := include "hoppscotch.resources" (dict "preset" .Values.admin.resourcesPreset "resources" .Values.admin.resources) }}
+          {{- if $resources }}
+          resources:
+            {{- $resources | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.admin.volumeMounts .Values.admin.persistence.enabled }}
+          volumeMounts:
+            {{- if .Values.admin.persistence.enabled }}
+            - name: data
+              mountPath: {{ .Values.admin.persistence.mountPath }}
+              {{- if .Values.admin.persistence.subPath }}
+              subPath: {{ .Values.admin.persistence.subPath }}
+              {{- end }}
+            {{- end }}
+            {{- with .Values.admin.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.admin.extraEnvVars }}
+          env:
+            {{- toYaml .Values.admin.extraEnvVars | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "hoppscotch.fullname" . }}
+            - secretRef:
+                name: {{ include "hoppscotch.secretName" . }}
+            {{- if .Values.admin.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ .Values.admin.extraEnvVarsCM }}
+            {{- end }}
+            {{- if .Values.admin.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ .Values.admin.extraEnvVarsSecret }}
+            {{- end }}
+      {{- if or .Values.admin.volumes .Values.admin.persistence.enabled }}
+      volumes:
+        {{- if .Values.admin.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            {{- if .Values.admin.persistence.existingClaim }}
+            claimName: {{ .Values.admin.persistence.existingClaim }}
+            {{- else }}
+            claimName: {{ include "hoppscotch.fullname" . }}-admin
+            {{- end }}
+        {{- end }}
+        {{- with .Values.admin.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.admin.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.admin.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.admin.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.admin.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

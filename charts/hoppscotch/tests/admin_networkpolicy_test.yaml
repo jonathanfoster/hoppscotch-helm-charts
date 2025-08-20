@@ -1,0 +1,45 @@
+suite: Admin Network Policy
+templates:
+  - admin/networkpolicy.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - secrets.yaml
+  - service.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate network policy when deployment mode is distributed and network policy is enabled
+    template: admin/networkpolicy.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        networkPolicy:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+      - hasDocuments:
+          count: 1
+
+  - it: should not generate network policy when deployment mode is distributed and network policy is disabled
+    template: admin/networkpolicy.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        networkPolicy:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not generate network policy when deployment mode is not distributed
+    template: admin/networkpolicy.yaml
+    set:
+      deploymentMode: aio
+      admin:
+        networkPolicy:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

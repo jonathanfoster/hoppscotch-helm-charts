@@ -1,0 +1,32 @@
+suite: Frontend Ingress
+templates:
+  - frontend/deployment.yaml
+  - frontend/ingress.yaml
+  - frontend/service.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate ingress when deployment mode is distributed
+    template: frontend/ingress.yaml
+    set:
+      deploymentMode: distributed
+      frontend:
+        ingress:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+      - equal:
+          path: metadata.name
+          value: release-name-hoppscotch-frontend
+
+  - it: should not generate ingress when deployment mode is not distributed
+    template: frontend/ingress.yaml
+    set:
+      deploymentMode: aio
+    asserts:
+      - hasDocuments:
+          count: 0

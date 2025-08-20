@@ -1,0 +1,14 @@
+deploymentMode: aio
+hoppscotch:
+  frontend:
+    enableSubpathBasedAccess: false
+postgresql:
+  enabled: true
+  auth:
+    username: hoppscotch
+    password: hoppscotch
+    database: hoppscotch
+  primary:
+    persistentVolumeClaimRetentionPolicy:
+      enabled: true
+      whenDeleted: Delete

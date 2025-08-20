@@ -1,0 +1,65 @@
+{{- if and (eq .Values.deploymentMode "aio") .Values.aio.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.aio.ingress.annotations }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.aio.ingress.annotations }}
+    {{- toYaml .Values.aio.ingress.annotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  {{- if .Values.aio.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.aio.ingress.ingressClassName | quote }}
+  {{- end }}
+  rules:
+    {{- if .Values.aio.ingress.hostname }}
+    - host: {{ .Values.aio.ingress.hostname }}
+      http:
+        paths:
+          {{- if .Values.aio.ingress.extraPaths }}
+          {{- toYaml .Values.aio.ingress.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.aio.ingress.path }}
+            pathType: {{ .Values.aio.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "hoppscotch.fullname" . }}
+                port:
+                  number: {{ .Values.aio.service.ports.http }}
+    {{- end }}
+    {{- range .Values.aio.ingress.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            backend:
+              service:
+                name: {{ include "hoppscotch.fullname" $ }}
+                port:
+                  number: {{ $.Values.aio.service.ports.http }}
+    {{- end }}
+    {{- if .Values.aio.ingress.extraRules }}
+    {{- toYaml .Values.aio.ingress.extraRules | nindent 4 }}
+    {{- end }}
+  {{- if or (and .Values.aio.ingress.tls (or (include "hoppscotch.hasCertManagerRequest" ( dict "annotations" .Values.aio.ingress.annotations )) .Values.aio.ingress.selfSigned)) .Values.aio.ingress.extraTls }}
+  tls:
+    {{- if and .Values.aio.ingress.tls (or (include "hoppscotch.hasCertManagerRequest" ( dict "annotations" .Values.aio.ingress.annotations )) .Values.aio.ingress.selfSigned) }}
+    - hosts:
+        - {{ .Values.aio.ingress.hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.aio.ingress.hostname }}
+    {{- end }}
+    {{- if .Values.aio.ingress.extraTls }}
+    {{- .Values.aio.ingress.extraTls | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

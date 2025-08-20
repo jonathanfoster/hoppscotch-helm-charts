@@ -1,0 +1,57 @@
+suite: Admin PVC
+templates:
+  - admin/deployment.yaml
+  - admin/pvc.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate PVC when deployment mode is distributed and persistence is enabled
+    template: admin/pvc.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        persistence:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+      - equal:
+          path: metadata.name
+          value: release-name-hoppscotch-admin
+
+  - it: should not generate PVC when deployment mode is distributed and persistence is disabled
+    template: admin/pvc.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        persistence:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not generate PVC when deployment mode is distributed and existing claim is set
+    template: admin/pvc.yaml
+    set:
+      deploymentMode: distributed
+      admin:
+        persistence:
+          enabled: true
+          existingClaim: my-existing-claim
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not generate PVC when deployment mode is not distributed
+    template: admin/pvc.yaml
+    set:
+      deploymentMode: aio
+      admin:
+        persistence:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

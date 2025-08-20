@@ -1,0 +1,324 @@
+# Hoppscotch Helm Chart
+
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+{{ template "chart.description" . }}
+
+## TL;DR
+
+```bash
+helm install hoppscotch http://hoppscotch.github.io/helm-charts/hoppscotch
+```
+
+## Introduction
+
+This chart bootstraps a [Hoppscotch](https://github.com/hoppscotch/hoppscotch) deployment on a
+[Kubernetes](https://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+
+## Prerequisites
+
+- Kubernetes 1.23+
+- Helm 3.8.0+
+- Persistent volume provisioner support in the underlying infrastructure
+
+## Installing the Chart
+
+To install the chart with the release name `hoppscotch`:
+
+```bash
+helm repo add hoppscotch https://hoppscotch.github.io/helm-charts
+helm install hoppscotch hoppscotch/hoppscotch
+```
+
+## Deployment Modes
+
+Hoppscotch supports two deployment modes:
+
+- **All-In-One** Using the All-In-One container which includes all services in a single container
+- **Distributed** Using individual containers for each service
+
+### Using All-in-One Container
+
+To deploy Hoppscotch using the AIO container, set the `deploymentMode` to `aio` in your values file:
+
+```yaml
+deploymentMode: aio
+```
+
+The AIO container supports two access modes:
+
+- **Subpath Access**: Services are accessible via subpaths on a single port (80)
+- **Multiport Access**: Each service is accessible on its own port
+
+#### Subpath Access
+
+When using AIO with subpath access, services can be accessed on port 80 from the following subpaths:
+
+| Mode | Access  | Container | Service  | Ports | Path                |
+| ---- | ------- | --------- | -------- | ----- | ------------------- |
+| AIO  | Subpath | AIO       | Frontend | 80    | /                   |
+| AIO  | Subpath | AIO       | Desktop  | 80    | /desktop-app-server |
+| AIO  | Subpath | AIO       | Backend  | 80    | /backend            |
+| AIO  | Subpath | AIO       | Admin    | 80    | /admin              |
+
+To enable subpath access, set the following in your values file:
+
+```yaml
+deploymentMode: aio
+hoppscotch:
+  frontend:
+    enableSubpathBasedAccess: true
+```
+
+#### Multiport Access
+
+When using AIO with multiport access, services can be accessed on the following ports:
+
+| Mode | Access    | Container | Service  | Ports | Path |
+| ---- | --------- | --------- | -------- | ----- | ---- |
+| AIO  | Multiport | AIO       | Frontend | 3000  | /    |
+| AIO  | Multiport | AIO       | Desktop  | 3200  | /    |
+| AIO  | Multiport | AIO       | Backend  | 3170  | /    |
+| AIO  | Multiport | AIO       | Admin    | 3100  | /    |
+
+To enable individual services, set the following in your values file:
+
+```yaml
+deploymentMode: aio
+hoppscotch:
+  frontend:
+    enableSubpathBasedAccess: false
+```
+
+### Using Individual Containers
+
+To deploy Hoppscotch using individual containers for each service, set the `deploymentMode` to `distributed` in your
+values file:
+
+```yaml
+deploymentMode: distributed
+```
+
+Services can be accessed on the following ports:
+
+| Mode        | Access    | Container | Service  | Ports    | Path |
+| ----------- | --------- | --------- | -------- | -------- | ---- |
+| Distributed | Multiport | Frontend  | Frontend | 80, 3000 | /    |
+| Distributed | Multiport | Frontend  | Desktop  | 3200     | /    |
+| Distributed | Multiport | Backend   | Backend  | 80, 3170 | /    |
+| Distributed | Multiport | Admin     | Admin    | 80, 3100 | /    |
+
+Note: Only multiport access is supported in distributed mode.
+
+## Enterprise Edition
+
+Hoppscotch offers an Enterprise Edition with additional features and support. To enable Enterprise Edition, you must set
+your enterprise license key and configure containers to use the enterprise images:
+
+To set your enterprise license key, add the following to your values file:
+
+```yaml
+hoppscotch:
+  backend:
+    enterpriseLicenseKey: your-enterprise-license-key
+```
+
+To configure containers to use the enterprise images, set the following in your values file:
+
+```yaml
+aio:
+  image:
+    repository: hoppscotch/hoppscotch-enterprise
+frontend:
+  image:
+    repository: hoppscotch/hoppscotch-frontend-enterprise
+backend:
+  image:
+    repository: hoppscotch/hoppscotch-backend-enterprise
+admin:
+  image:
+    repository: hoppscotch/hoppscotch-admin-enterprise
+```
+
+## Auto-Generating Config URLs
+
+The chart automatically sets configuration URLs for the frontend, backend, and admin services based on the deployment
+mode and ingress configuration.
+
+```yaml
+deploymentMode: aio
+aio:
+  ingress:
+    enabled: true
+    hostname: hoppscotch.example.com
+    path: /
+    tls: true
+```
+
+You can override these URLs by explicitly setting them in your values file.
+
+```yaml
+hoppscotch:
+  frontend:
+    adminUrl: https://hoppscotch.example.com/admin
+    baseUrl: https://hoppscotch.example.com
+    backendGqlUrl: https://hoppscotch.example.com/backend/graphql
+    backendWsUrl: wss://hoppscotch.example.com/backend/graphql
+    backendApiUrl: https://hoppscotch.example.com/backend/v1
+    shortcodeBaseUrl: https://hoppscotch.example.com
+  backend:
+    auth:
+      github:
+        callbackUrl: https://hoppscotch.example.com/backend/v1/auth/github/callback
+      google:
+        callbackUrl: https://hoppscotch.example.com/backend/v1/auth/google/callback
+      microsoft:
+        callbackUrl: https://hoppscotch.example.com/backend/v1/auth/microsoft/callback
+      oidc:
+        callbackUrl: https://hoppscotch.example.com/backend/v1/auth/oidc/callback
+      saml:
+        callbackUrl: https://hoppscotch.example.com/backend/v1/auth/saml/callback
+```
+
+If deployment ingress is not enabled, then no URLs will be auto-generated.
+
+```yaml
+deploymentMode: aio
+aio:
+  ingress:
+    enabled: false
+```
+
+See below the specific environment variables that are auto-generated.
+
+### AIO Auto-Generated Config URLs
+
+#### AIO Frontend
+
+| Key                     | Value                                                                 |
+| ----------------------- | --------------------------------------------------------------------- |
+| VITE_ADMIN_URL          | `https://${aio.ingress.hostname}/${aio.ingress.path}/admin`           |
+| VITE_BACKEND_API_URL    | `https://${aio.ingress.hostname}/${aio.ingress.path}/backend/v1`      |
+| VITE_BACKEND_GQL_URL    | `https://${aio.ingress.hostname}/${aio.ingress.path}/backend/graphql` |
+| VITE_BACKEND_WS_URL     | `wss://${aio.ingress.hostname}/${aio.ingress.path}/backend/graphql`   |
+| VITE_BASE_URL           | `https://${aio.ingress.hostname}/${aio.ingress.path}`                 |
+| VITE_SHORTCODE_BASE_URL | `https://${aio.ingress.hostname}/${aio.ingress.path}`                 |
+
+#### AIO Backend
+
+<!-- markdownlint-disable MD013 MD034 -->
+
+| Key                    | Value                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| GITHUB_CALLBACK_URL    | `https://${aio.ingress.hostname}/${aio.ingress.path}/backend/v1/auth/github/callback`    |
+| GOOGLE_CALLBACK_URL    | `https://${aio.ingress.hostname}/${aio.ingress.path}/backend/v1/auth/google/callback`    |
+| MICROSOFT_CALLBACK_URL | `https://${aio.ingress.hostname}/${aio.ingress.path}/backend/v1/auth/microsoft/callback` |
+| OIDC_CALLBACK_URL      | `https://${aio.ingress.hostname}/${aio.ingress.path}/backend/v1/auth/oidc/callback`      |
+| REDIRECT_URL           | `https://${aio.ingress.hostname}/${aio.ingress.path}`                                    |
+| SAML_CALLBACK_URL      | `https://${aio.ingress.hostname}/${aio.ingress.path}/backend/v1/auth/saml/callback`      |
+| WHITELISTED_ORIGINS    | `https://${aio.ingress.hostname},app://${aio.ingress.hostname}`                          |
+
+<!-- markdownlint-enable MD013 MD034 -->
+
+### Distributed Auto-Generated Config URLs
+
+#### Distributed Frontend
+
+| Key                     | Value                                                                 |
+| ----------------------- | --------------------------------------------------------------------- |
+| VITE_ADMIN_URL          | `https://${admin.ingress.hostname}/${admin.ingress.path}`             |
+| VITE_BACKEND_API_URL    | `https://${backend.ingress.hostname}/${backend.ingress.path}/v1`      |
+| VITE_BACKEND_GQL_URL    | `https://${backend.ingress.hostname}/${backend.ingress.path}/graphql` |
+| VITE_BACKEND_WS_URL     | `wss://${backend.ingress.hostname}/${backend.ingress.path}/graphql`   |
+| VITE_BASE_URL           | `https://${backend.ingress.hostname}/${backend.ingress.path}`         |
+| VITE_SHORTCODE_BASE_URL | `https://${backend.ingress.hostname}/${backend.ingress.path}`         |
+
+#### Distributed Backend
+
+<!-- markdownlint-disable MD013 MD034 -->
+
+| Key                    | Value                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| GITHUB_CALLBACK_URL    | `https://${backend.ingress.hostname}/${backend.ingress.path}/v1/auth/github/callback`    |
+| GOOGLE_CALLBACK_URL    | `https://${backend.ingress.hostname}/${backend.ingress.path}/v1/auth/google/callback`    |
+| MICROSOFT_CALLBACK_URL | `https://${backend.ingress.hostname}/${backend.ingress.path}/v1/auth/microsoft/callback` |
+| OIDC_CALLBACK_URL      | `https://${backend.ingress.hostname}/${backend.ingress.path}/v1/auth/oidc/callback`      |
+| REDIRECT_URL           | `https://${frontend.ingress.hostname}/${frontend.ingress.path}`                          |
+| SAML_CALLBACK_URL      | `https://${backend.ingress.hostname}/${backend.ingress.path}/v1/auth/saml/callback`      |
+| WHITELISTED_ORIGINS    | `https://${frontend.ingress.hostname},app://${frontend.ingress.hostname}`                |
+
+<!-- markdownlint-enable MD013 MD034 -->
+
+## Auto-Generating Secrets
+
+The chart automatically generates secrets if not provided. These auto-generated secrets will be persisted and reused on
+subsequent upgrades.
+
+```yaml
+hoppscotch:
+  backend:
+    auth:
+      jwtSecret: "" # Random 64-character alphanumeric string used if not provided
+      salt: "" # Random 64-character alphanumeric string used if not provided
+      sessionSecret: "" # Random 64-character alphanumeric string used if not provided
+      dataEncryptionKey: "" # Random 32-character alphanumeric string used if not provided
+```
+
+## Waiting for Database Readiness
+
+Hoppscotch pods that connect to the database will wait for the database to be ready before starting. This is
+accomplished by using the `wait-for-db` and `wait-for-migrations` default init containers.
+
+The `wait-for-db` init container runs the following command to check if the database is ready:
+
+```bash
+# Wait for the database to be ready
+until pg_isready -d ${DATABASE_URL}; do sleep 3; done
+```
+
+Once the database is ready, the `wait-for-migrations` init container runs the following command to ensure that
+database migrations have been applied:
+
+```bash
+until ./node_modules/.bin/prisma migrate status; do sleep 2; done
+```
+
+This behavior can be disabled by setting the following in your values file:
+
+```yaml
+defaultInitContainers:
+  waitForDatabase: false
+  waitForMigrations: false
+```
+
+## Running Database Migrations
+
+Database migrations are run automatically after installs and upgrades. The chart includes a migrations job that runs the
+following command:
+
+```bash
+./node_modules/.bin/prisma migrate deploy
+```
+
+This behavior can be disabled by setting the following in your values file:
+
+```yaml
+migrations:
+  enabled: false
+```
+
+Note the migrations job is not triggered by Helm hooks to avoid issues with the `--wait` flag. When the `--wait` flag is
+set, Helm waits until all resources are ready before running `post-install` and `post-upgrade` hooks. This results in a
+circular dependency because the migrations job waits for the Hoppscotch pods to be ready, but the Hoppscotch pods wait
+for the migrations job to complete.
+
+Instead the migration job is triggered by appending the release revision number to the job name to ensure that it is
+unique for each release. This allows the job to be run multiple times without conflicts.
+
+## Parameters
+
+<!-- markdownlint-disable MD013 MD034 -->
+{{ template "chart.valuesTable" . }}
+<!-- markdownlint-enable MD013 MD034 -->

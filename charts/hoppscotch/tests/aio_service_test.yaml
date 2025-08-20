@@ -1,0 +1,28 @@
+suite: AIO Service
+templates:
+  - aio/deployment.yaml
+  - aio/service.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate service when deployment mode is aio
+    template: aio/service.yaml
+    set:
+      deploymentMode: aio
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: Service
+      - equal:
+          path: metadata.name
+          value: release-name-hoppscotch
+
+  - it: should not generate service when deployment mode is distributed
+    template: aio/service.yaml
+    set:
+      deploymentMode: distributed
+    asserts:
+      - hasDocuments:
+          count: 0

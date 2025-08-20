@@ -1,0 +1,160 @@
+{{- if eq .Values.deploymentMode "distributed" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hoppscotch.fullname" . }}-backend
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: hoppscotch-backend
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.backend.autoscaling.enabled }}
+  replicas: {{ .Values.backend.replicaCount }}
+  {{- end }}
+  {{- if .Values.backend.updateStrategy }}
+  strategy:
+    {{- toYaml .Values.backend.updateStrategy | nindent 4 }}
+  {{- else }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: hoppscotch-backend
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/configmap-{{ include "hoppscotch.fullname" . }}: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret-{{ include "hoppscotch.fullname" . }}: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with .Values.backend.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app.kubernetes.io/component: hoppscotch-backend
+        {{- include "hoppscotch.labels" . | nindent 8 }}
+        {{- with .Values.backend.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hoppscotch.serviceAccountName" . }}
+      {{- with .Values.backend.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: hoppscotch
+          {{- with .Values.backend.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "hoppscotch.image" (dict "component" .Values.backend "context" .) }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.containerPorts.http }}
+              protocol: TCP
+          {{- if .Values.backend.customLivenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.backend.customLivenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.backend.customReadinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.backend.customReadinessProbe | nindent 12 }}
+          {{- else if .Values.backend.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: {{ .Values.backend.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.backend.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.backend.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.backend.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.backend.customStartupProbe }}
+          startupProbe:
+            {{- toYaml .Values.backend.customStartupProbe | nindent 12 }}
+          {{- end }}
+          {{- $resources := include "hoppscotch.resources" (dict "preset" .Values.backend.resourcesPreset "resources" .Values.backend.resources) }}
+          {{- if $resources }}
+          resources:
+            {{- $resources | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.backend.volumeMounts .Values.backend.persistence.enabled }}
+          volumeMounts:
+            {{- if .Values.backend.persistence.enabled }}
+            - name: data
+              mountPath: {{ .Values.backend.persistence.mountPath }}
+              {{- if .Values.backend.persistence.subPath }}
+              subPath: {{ .Values.backend.persistence.subPath }}
+              {{- end }}
+            {{- end }}
+            {{- with .Values.backend.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.backend.extraEnvVars }}
+          env:
+            {{- toYaml .Values.backend.extraEnvVars | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "hoppscotch.fullname" . }}
+            - secretRef:
+                name: {{ include "hoppscotch.secretName" . }}
+            {{- if .Values.backend.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ .Values.backend.extraEnvVarsCM }}
+            {{- end }}
+            {{- if .Values.backend.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ .Values.backend.extraEnvVarsSecret }}
+            {{- end }}
+      {{- if or .Values.defaultInitContainers.waitForDatabase .Values.defaultInitContainers.waitForMigrations }}
+      initContainers:
+        {{- if .Values.defaultInitContainers.waitForDatabase.enabled }}
+        {{- include "hoppscotch.defaultInitContainers.waitForDatabase" . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.defaultInitContainers.waitForMigrations.enabled }}
+        {{- include "hoppscotch.defaultInitContainers.waitForMigrations" . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- if or .Values.backend.volumes .Values.backend.persistence.enabled }}
+      volumes:
+        {{- if .Values.backend.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            {{- if .Values.backend.persistence.existingClaim }}
+            claimName: {{ .Values.backend.persistence.existingClaim }}
+            {{- else }}
+            claimName: {{ include "hoppscotch.fullname" . }}-backend
+            {{- end }}
+        {{- end }}
+        {{- with .Values.backend.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.backend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
