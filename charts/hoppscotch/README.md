@@ -425,7 +425,7 @@ unique for each release. This allows the job to be run multiple times without co
 | hoppscotch.backend.clickhouse.allowAuditLogs | bool | `false` | Enable audit logs collection to ClickHouse. Enterprise Edition required. |
 | hoppscotch.backend.horizontalScalingEnabled | bool | `false` | Enable horizontal scaling with Redis for state management. Enterprise Edition required. |
 
-### Hoppscotch AIO Parameters
+### Hoppscotch AIO Container Parameters
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -540,7 +540,7 @@ unique for each release. This allows the job to be run multiple times without co
 | aio.metrics.serviceMonitor.relabelings | list | `[]` | ServiceMonitor relabelings |
 | aio.metrics.serviceMonitor.selector | object | `{}` | ServiceMonitor selector |
 
-### Hoppscotch Frontend Parameters
+### Hoppscotch Frontend Container Parameters
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -643,7 +643,7 @@ unique for each release. This allows the job to be run multiple times without co
 | frontend.metrics.serviceMonitor.relabelings | list | `[]` | ServiceMonitor relabelings |
 | frontend.metrics.serviceMonitor.selector | object | `{}` | ServiceMonitor selector |
 
-### Hoppscotch Backend Parameters
+### Hoppscotch Backend Container Parameters
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -746,7 +746,7 @@ unique for each release. This allows the job to be run multiple times without co
 | backend.metrics.serviceMonitor.relabelings | list | `[]` | ServiceMonitor relabelings |
 | backend.metrics.serviceMonitor.selector | object | `{}` | ServiceMonitor selector |
 
-### Hoppscotch Admin Parameters
+### Hoppscotch Admin Container Parameters
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -849,7 +849,7 @@ unique for each release. This allows the job to be run multiple times without co
 | admin.metrics.serviceMonitor.relabelings | list | `[]` | ServiceMonitor relabelings |
 | admin.metrics.serviceMonitor.selector | object | `{}` | ServiceMonitor selector |
 
-### Hoppscotch Migrations Parameters
+### Hoppscotch Migrations Container Parameters
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
