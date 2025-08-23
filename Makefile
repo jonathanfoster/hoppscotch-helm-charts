@@ -60,6 +60,16 @@ helm-install: kind-create-cluster ## Install chart
 	@echo "Installing ${CHART_NAME} chart"
 	helm install ${CHART_NAME} charts/${CHART_NAME} -n ${CHART_NAMESPACE} --values=${CHART_VALUES} --create-namespace --wait
 
+.PHONY: helm-package
+helm-package: clean ## Package Helm charts
+	@echo "Packaging Helm charts"
+	cr package charts/${CHART_NAME}
+
+.PHONY: helm-test
+helm-test: ## Run chart tests
+	@echo "Running ${CHART_NAME} chart tests"
+	helm test ${CHART_NAME} --namespace ${CHART_NAMESPACE}
+
 .PHONY: helm-template
 helm-template: clean ## Render chart templates
 	@echo "Rendering ${CHART_NAME} chart templates"
@@ -208,11 +218,6 @@ lint-yaml: ## Lint YAML files
 	@echo "Linting YAML files"
 	yamllint .
 
-.PHONY: package
-package: clean ## Package Helm charts
-	@echo "Packaging Helm charts"
-	cr package charts/${CHART_NAME}
-
 .PHONY: pre-commit
 pre-commit: fmt lint test-unit ## Run pre-commit hooks
 
@@ -220,6 +225,9 @@ pre-commit: fmt lint test-unit ## Run pre-commit hooks
 test-e2e: ## Run end-to-end tests
 	@echo "Running end-to-end tests for ${CHART_NAME} chart"
 	${TEST_E2E_DIR}/test-e2e.sh --charts=charts/${CHART_NAME} --debug
+
+.PHONY: test-integration
+test-integration: helm-test ## Run integration tests
 
 .PHONY: test-unit
 test-unit: ## Run unit tests
