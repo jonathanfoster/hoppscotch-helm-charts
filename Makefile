@@ -155,6 +155,10 @@ install-deps-macos: ## Install dependencies for MacOS
 		echo "Error: Homebrew is not installed" 1>&2; \
 		exit 1; \
 	fi
+	@if ! command -v npm &> /dev/null; then \
+		echo "Error: NPM is not installed" 1>&2; \
+		exit 1; \
+	fi
 	brew update
 	brew install chart-releaser
 	brew install chart-testing
@@ -196,7 +200,12 @@ kind-delete-cluster: ## Delete the kind cluster
 	fi
 
 .PHONY: lint
-lint: lint-helm lint-markdown lint-shell lint-yaml ## Run all linters
+lint: lint-commit lint-helm lint-markdown lint-shell lint-yaml ## Run all linters
+
+.PHONY: lint-commit
+lint-commit: ## Lint commit messages
+	@echo "Linting commit messages"
+	npx commitlint --from-last-tag --verbose
 
 .PHONY: lint-helm
 lint-helm: ## Lint Helm charts
