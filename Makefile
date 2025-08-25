@@ -215,7 +215,7 @@ lint-helm: ## Lint Helm charts
 .PHONY: lint-markdown
 lint-markdown: ## Lint Markdown files
 	@echo "Linting Markdown files"
-	markdownlint '**/*.md'
+	markdownlint -d '**/*.md'
 
 .PHONY: lint-shell
 lint-shell: ## Lint shell scripts
