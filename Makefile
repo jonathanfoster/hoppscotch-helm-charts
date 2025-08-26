@@ -50,7 +50,7 @@ fmt-yaml-fix: ## Fix YAML files formatting
 	prettier -w **/*.yaml
 
 .PHONY: helm-docs
-helm-docs: ## Generate Helm docs
+helm-docs: helm-schema ## Generate Helm docs
 	@echo "Generating Helm docs"
 	helm-docs --sort-values-order=file
 	$(MAKE) fmt-markdown-fix
@@ -64,6 +64,11 @@ helm-install: kind-create-cluster ## Install chart
 helm-package: clean ## Package Helm charts
 	@echo "Packaging Helm charts"
 	cr package charts/${CHART_NAME}
+
+.PHONY: helm-schema
+helm-schema: ## Generate Helm schema
+	@echo "Generating Helm schema"
+	helm-schema -c charts/${CHART_NAME} -n -p -r
 
 .PHONY: helm-test
 helm-test: ## Run chart tests
@@ -132,9 +137,13 @@ install-deps-linux: ## Install dependencies for Linux
 	@echo "Installing helm-unittest"
 	@if ! helm plugin list | grep -q 'unittest'; then \
 		helm plugin install https://github.com/helm-unittest/helm-unittest; \
-	fi
+	else \
+		echo "Warning: helm-unittest plugin is already installed"; \
+	fixw
 	@echo "Installing helm-docs"
 	go install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
+	@echo "Installing helm-schema"
+	go install github.com/dadav/helm-schema/cmd/helm-schema@latest
 	@echo "Installing kind"
 	go install sigs.k8s.io/kind@latest
 	@echo "Installing markdownlint-cli"
@@ -155,6 +164,10 @@ install-deps-macos: ## Install dependencies for MacOS
 		echo "Error: Homebrew is not installed" 1>&2; \
 		exit 1; \
 	fi
+	@if ! command -v go &> /dev/null; then \
+		echo "Error: Go is not installed" 1>&2; \
+		exit 1; \
+	fi
 	@if ! command -v npm &> /dev/null; then \
 		echo "Error: NPM is not installed" 1>&2; \
 		exit 1; \
@@ -170,6 +183,7 @@ install-deps-macos: ## Install dependencies for MacOS
 		echo "Warning: helm-unittest plugin is already installed"; \
 	fi
 	brew install norwoodj/tap/helm-docs
+	go install github.com/dadav/helm-schema/cmd/helm-schema@latest
 	brew install kind
 	brew install markdownlint-cli
 	brew install prettier
