@@ -40,7 +40,7 @@ spec:
             done
       {{- end }}
       - name: wait-for-migration
-        image: bitnami/kubectl:latest
+        image: alpine/kubectl:latest
         resources:
           {{- toYaml .Values.enterprise.initContainers.resources | nindent 10 }}
         command:
