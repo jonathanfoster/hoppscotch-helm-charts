@@ -49,6 +49,11 @@ fmt-yaml-fix: ## Fix YAML files formatting
 	@echo "Fixing YAML files formatting"
 	prettier -w "**/*.yaml"
 
+.PHONY: helm-deps-update
+helm-deps-update: ## Update chart dependencies
+	@echo "Updating ${CHART_NAME} chart dependencies"
+	helm dependency update charts/${CHART_NAME}
+
 .PHONY: helm-docs
 helm-docs: ## Generate Helm docs
 	@echo "Generating Helm docs"

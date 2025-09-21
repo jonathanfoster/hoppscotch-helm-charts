@@ -938,59 +938,71 @@ unique for each release. This allows the job to be run multiple times without co
 
 ### Database Parameters
 
-| Key                                             | Type   | Default        | Description                                                           |
-| ----------------------------------------------- | ------ | -------------- | --------------------------------------------------------------------- |
-| postgresql.enabled                              | bool   | `false`        | Enable PostgreSQL subchart                                            |
-| postgresql.auth.enablePostgresUser              | bool   | `true`         | Enable PostgreSQL default postgres user                               |
-| postgresql.auth.username                        | string | `""`           | PostgreSQL application username                                       |
-| postgresql.auth.password                        | string | `""`           | PostgreSQL application password                                       |
-| postgresql.auth.database                        | string | `""`           | PostgreSQL application database name                                  |
-| postgresql.auth.existingSecret                  | string | `""`           | Existing secret containing PostgreSQL credentials                     |
-| postgresql.architecture                         | string | `"standalone"` | PostgreSQL architecture (standalone or replication)                   |
-| postgresql.primary.resourcesPreset              | string | `"nano"`       | PostgreSQL primary resource preset                                    |
-| postgresql.primary.resources                    | object | `{}`           | PostgreSQL primary resource limits/requests                           |
-| externalDatabase.host                           | string | `""`           | External PostgreSQL host                                              |
-| externalDatabase.port                           | int    | `5432`         | External PostgreSQL port                                              |
-| externalDatabase.user                           | string | `""`           | External PostgreSQL username                                          |
-| externalDatabase.database                       | string | `""`           | External PostgreSQL database name                                     |
-| externalDatabase.password                       | string | `""`           | External PostgreSQL password                                          |
-| externalDatabase.sqlConnection                  | string | `""`           | External PostgreSQL full connection string (overrides other settings) |
-| externalDatabase.existingSecret                 | string | `""`           | Existing secret containing external PostgreSQL credentials            |
-| externalDatabase.existingSecretPasswordKey      | string | `""`           | Key in existing secret containing password                            |
-| externalDatabase.existingSecretSqlConnectionKey | string | `""`           | Key in existing secret containing SQL connection string               |
+| Key                                             | Type   | Default                             | Description                                                           |
+| ----------------------------------------------- | ------ | ----------------------------------- | --------------------------------------------------------------------- |
+| postgresql.enabled                              | bool   | `false`                             | Enable PostgreSQL subchart                                            |
+| postgresql.image.repository                     | string | `"bitnamilegacy/postgresql"`        | PostgreSQL image repository                                           |
+| postgresql.auth.enablePostgresUser              | bool   | `true`                              | Enable PostgreSQL default postgres user                               |
+| postgresql.auth.username                        | string | `""`                                | PostgreSQL application username                                       |
+| postgresql.auth.password                        | string | `""`                                | PostgreSQL application password                                       |
+| postgresql.auth.database                        | string | `""`                                | PostgreSQL application database name                                  |
+| postgresql.auth.existingSecret                  | string | `""`                                | Existing secret containing PostgreSQL credentials                     |
+| postgresql.architecture                         | string | `"standalone"`                      | PostgreSQL architecture (standalone or replication)                   |
+| postgresql.primary.resourcesPreset              | string | `"nano"`                            | PostgreSQL primary resource preset                                    |
+| postgresql.primary.resources                    | object | `{}`                                | PostgreSQL primary resource limits/requests                           |
+| postgresql.volumePermissions.image.repository   | string | `"bitnamilegacy/os-shell"`          | Volume Permissions image repository                                   |
+| postgresql.metrics.image.repository             | string | `"bitnamilegacy/postgres-exporter"` | PostgreSQL Prometheus Exporter image repository                       |
+| externalDatabase.host                           | string | `""`                                | External PostgreSQL host                                              |
+| externalDatabase.port                           | int    | `5432`                              | External PostgreSQL port                                              |
+| externalDatabase.user                           | string | `""`                                | External PostgreSQL username                                          |
+| externalDatabase.database                       | string | `""`                                | External PostgreSQL database name                                     |
+| externalDatabase.password                       | string | `""`                                | External PostgreSQL password                                          |
+| externalDatabase.sqlConnection                  | string | `""`                                | External PostgreSQL full connection string (overrides other settings) |
+| externalDatabase.existingSecret                 | string | `""`                                | Existing secret containing external PostgreSQL credentials            |
+| externalDatabase.existingSecretPasswordKey      | string | `""`                                | Key in existing secret containing password                            |
+| externalDatabase.existingSecretSqlConnectionKey | string | `""`                                | Key in existing secret containing SQL connection string               |
 
 ### Redis Parameters
 
-| Key                                     | Type   | Default        | Description                                           |
-| --------------------------------------- | ------ | -------------- | ----------------------------------------------------- |
-| redis.enabled                           | bool   | `false`        | Enable Redis subchart                                 |
-| redis.auth.enabled                      | bool   | `true`         | Enable Redis authentication                           |
-| redis.auth.password                     | string | `""`           | Redis password                                        |
-| redis.auth.existingSecret               | string | `""`           | Existing secret containing Redis credentials          |
-| redis.architecture                      | string | `"standalone"` | Redis architecture (standalone or replication)        |
-| redis.master.resourcesPreset            | string | `"nano"`       | Redis master resource preset                          |
-| redis.master.resources                  | object | `{}`           | Redis master resource limits/requests                 |
-| externalRedis.host                      | string | `""`           | External Redis host                                   |
-| externalRedis.port                      | int    | `6379`         | External Redis port                                   |
-| externalRedis.password                  | string | `""`           | External Redis password                               |
-| externalRedis.existingSecret            | string | `""`           | Existing secret containing external Redis credentials |
-| externalRedis.existingSecretPasswordKey | string | `""`           | Key in existing secret containing password            |
+| Key                                      | Type   | Default                          | Description                                           |
+| ---------------------------------------- | ------ | -------------------------------- | ----------------------------------------------------- |
+| redis.enabled                            | bool   | `false`                          | Enable Redis subchart                                 |
+| redis.image.repository                   | string | `"bitnamilegacy/redis"`          | Redis image repository                                |
+| redis.auth.enabled                       | bool   | `true`                           | Enable Redis authentication                           |
+| redis.auth.password                      | string | `""`                             | Redis password                                        |
+| redis.auth.existingSecret                | string | `""`                             | Existing secret containing Redis credentials          |
+| redis.architecture                       | string | `"standalone"`                   | Redis architecture (standalone or replication)        |
+| redis.master.resourcesPreset             | string | `"nano"`                         | Redis master resource preset                          |
+| redis.master.resources                   | object | `{}`                             | Redis master resource limits/requests                 |
+| redis.sentinel.image.repository          | string | `"bitnamilegacy/redis-sentinel"` | Redis Sentinel image repository                       |
+| redis.metrics.image.repository           | string | `"bitnamilegacy/redis-exporter"` | Redis Exporter image repository                       |
+| redis.volumePermissions.image.repository | string | `"bitnamilegacy/os-shell"`       | Volume Permissions image repository                   |
+| redis.kubectl.image.repository           | string | `"bitnamilegacy/kubectl"`        | Kubectl image repository                              |
+| redis.sysctl.image.repository            | string | `"bitnamilegacy/os-shell"`       | Sysctl image repository                               |
+| externalRedis.host                       | string | `""`                             | External Redis host                                   |
+| externalRedis.port                       | int    | `6379`                           | External Redis port                                   |
+| externalRedis.password                   | string | `""`                             | External Redis password                               |
+| externalRedis.existingSecret             | string | `""`                             | Existing secret containing external Redis credentials |
+| externalRedis.existingSecretPasswordKey  | string | `""`                             | Key in existing secret containing password            |
 
 ### ClickHouse Parameters
 
-| Key                                          | Type   | Default  | Description                                                |
-| -------------------------------------------- | ------ | -------- | ---------------------------------------------------------- |
-| clickhouse.enabled                           | bool   | `false`  | Enable ClickHouse subchart                                 |
-| clickhouse.auth.username                     | string | `""`     | ClickHouse username                                        |
-| clickhouse.auth.password                     | string | `""`     | ClickHouse password                                        |
-| clickhouse.auth.existingSecret               | string | `""`     | Existing secret containing ClickHouse credentials          |
-| clickhouse.resourcesPreset                   | string | `"nano"` | ClickHouse resource preset                                 |
-| clickhouse.resources                         | object | `{}`     | ClickHouse resource limits/requests                        |
-| externalClickhouse.host                      | string | `""`     | External ClickHouse host                                   |
-| externalClickhouse.port                      | int    | `8123`   | External ClickHouse port                                   |
-| externalClickhouse.user                      | string | `""`     | External ClickHouse username                               |
-| externalClickhouse.password                  | string | `""`     | External ClickHouse password                               |
-| externalClickhouse.existingSecret            | string | `""`     | Existing secret containing external ClickHouse credentials |
-| externalClickhouse.existingSecretPasswordKey | string | `""`     | Key in existing secret containing password                 |
+| Key                                                                 | Type   | Default                             | Description                                                |
+| ------------------------------------------------------------------- | ------ | ----------------------------------- | ---------------------------------------------------------- |
+| clickhouse.enabled                                                  | bool   | `false`                             | Enable ClickHouse subchart                                 |
+| clickhouse.defaultInitContainers.volumePermissions.image.repository | string | `"bitnamilegacy/os-shell"`          | Volume Permissions image repository                        |
+| clickhouse.image.repository                                         | string | `"bitnamilegacy/clickhouse"`        | ClickHouse image repository                                |
+| clickhouse.auth.username                                            | string | `""`                                | ClickHouse username                                        |
+| clickhouse.auth.password                                            | string | `""`                                | ClickHouse password                                        |
+| clickhouse.auth.existingSecret                                      | string | `""`                                | Existing secret containing ClickHouse credentials          |
+| clickhouse.resourcesPreset                                          | string | `"nano"`                            | ClickHouse resource preset                                 |
+| clickhouse.resources                                                | object | `{}`                                | ClickHouse resource limits/requests                        |
+| clickhouse.keeper.image.repository                                  | string | `"bitnamilegacy/clickhouse-keeper"` | ClickHouse Keeper image repository                         |
+| externalClickhouse.host                                             | string | `""`                                | External ClickHouse host                                   |
+| externalClickhouse.port                                             | int    | `8123`                              | External ClickHouse port                                   |
+| externalClickhouse.user                                             | string | `""`                                | External ClickHouse username                               |
+| externalClickhouse.password                                         | string | `""`                                | External ClickHouse password                               |
+| externalClickhouse.existingSecret                                   | string | `""`                                | Existing secret containing external ClickHouse credentials |
+| externalClickhouse.existingSecretPasswordKey                        | string | `""`                                | Key in existing secret containing password                 |
 
 <!-- markdownlint-enable MD013 MD034 -->
