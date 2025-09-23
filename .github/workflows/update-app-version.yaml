@@ -1,0 +1,99 @@
+name: Update App Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_version:
+        description: 'App version to set (e.g., v1.2.3)'
+        required: true
+        type: string
+      chart_name:
+        description: 'Chart name to update'
+        required: true
+        type: choice
+        default: 'hoppscotch'
+        options:
+          - hoppscotch
+
+jobs:
+  update-app-version:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install yq
+        run: |
+          YQ_VERSION="v4.43.1"
+          YQ_BINARY="yq_linux_amd64"
+          YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}"
+          YQ_SHA_URL="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.sha256"
+          wget -qO "${YQ_BINARY}" "${YQ_URL}"
+          wget -qO "${YQ_BINARY}.sha256" "${YQ_SHA_URL}"
+          sha256sum --check --status "${YQ_BINARY}.sha256"
+          sudo mv "${YQ_BINARY}" /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update App Version Only
+        run: |
+          CHART_NAME="${{ github.event.inputs.chart_name }}"
+          APP_VERSION="${{ github.event.inputs.app_version }}"
+
+          CHART_FILE="charts/$CHART_NAME/Chart.yaml"
+
+          if [ ! -f "$CHART_FILE" ]; then
+            echo "Chart file not found: $CHART_FILE"
+            exit 1
+          fi
+
+          # Get current chart version
+          CURRENT_CHART_VERSION=$(yq eval '.version' "$CHART_FILE")
+
+          # Backup original
+          cp "$CHART_FILE" "$CHART_FILE.backup"
+
+          # Update only appVersion, keep chart version unchanged
+          yq eval '.appVersion = "'$APP_VERSION'"' -i "$CHART_FILE"
+
+          echo "Updated $CHART_FILE:"
+          echo "  Chart version: $CURRENT_CHART_VERSION (unchanged)"
+          echo "  App version: $APP_VERSION (updated)"
+
+          # Show the changes
+          echo "Changes made:"
+          diff "$CHART_FILE.backup" "$CHART_FILE" || true
+
+      - name: Commit App Version Update
+        run: |
+          CHART_NAME="${{ github.event.inputs.chart_name }}"
+          APP_VERSION="${{ github.event.inputs.app_version }}"
+
+          git add charts/$CHART_NAME/Chart.yaml
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Update $CHART_NAME appVersion to $APP_VERSION"
+
+      - name: Push Changes
+        run: |
+          git push origin main
+
+      - name: Summary
+        run: |
+          echo "App version updated successfully!"
+          echo ""
+          echo "Chart: ${{ github.event.inputs.chart_name }}"
+          echo "App Version: ${{ github.event.inputs.app_version }}"
+          echo ""
+          echo "Chart version was NOT changed - no new release created"
+          echo "This update tracks app compatibility without releasing a new chart version"
