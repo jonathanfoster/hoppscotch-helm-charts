@@ -105,21 +105,16 @@ jobs:
           echo "Changes made:"
           diff "$CHART_FILE.backup" "$CHART_FILE" || true
 
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
       - name: Validate Chart
         run: |
           CHART_NAME="${{ github.event.inputs.chart_name }}"
 
-          # Install Helm
-          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-          head -20 get_helm.sh  # Optional: show first 20 lines for inspection
-          chmod +x get_helm.sh
-          ./get_helm.sh
-
-          # Lint the chart
-          echo "Linting chart..."
-          helm lint charts/$CHART_NAME
-
-          # Test template generation
+        # Install Helm is now handled by the previous step
           echo "Testing template generation..."
           helm template test-release charts/$CHART_NAME > /dev/null
 
