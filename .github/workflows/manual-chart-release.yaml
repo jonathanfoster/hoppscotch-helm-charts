@@ -33,6 +33,11 @@ on:
         default: 'hoppscotch'
         options:
           - hoppscotch
+      dry_run:
+        description: 'Dry run mode - test without making changes'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   manual-chart-release:
@@ -55,10 +60,26 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
+      - name: Show Dry Run Status
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "DRY RUN MODE - No changes will be made"
+            echo "This will test all steps without modifying files or creating releases"
+          else
+            echo "LIVE MODE - Changes will be made and release will be created"
+          fi
+
       - name: Validate Inputs
         run: |
           CHART_VERSION="${{ github.event.inputs.chart_version }}"
           CHART_NAME="${{ github.event.inputs.chart_name }}"
+          echo "Validating inputs..."
+          echo "Chart: $CHART_NAME"
+          echo "Chart Version: $CHART_VERSION"
+          echo "App Version: ${{ github.event.inputs.app_version }}"
+          echo "Release Type: ${{ github.event.inputs.release_type }}"
+          echo "Dry Run: ${{ github.event.inputs.dry_run }}"
+
           if [[ ! "$CHART_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Invalid chart version format. Use semantic versioning (e.g., 0.2.0)"
             exit 1
@@ -72,10 +93,34 @@ jobs:
           echo "New chart version: $CHART_VERSION"
           if [ "$CURRENT_VERSION" = "$CHART_VERSION" ]; then
             echo "Warning: New version is the same as current version"
-            echo "This will still proceed but may not create a new release"
           fi
 
-      - name: Update Chart.yaml
+      - name: Update Chart.yaml (Dry Run Preview)
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          CHART_NAME="${{ github.event.inputs.chart_name }}"
+          CHART_VERSION="${{ github.event.inputs.chart_version }}"
+          APP_VERSION="${{ github.event.inputs.app_version }}"
+          CHART_FILE="charts/$CHART_NAME/Chart.yaml"
+
+          echo "DRY RUN: Showing what changes would be made to $CHART_FILE"
+          echo "Current content:"
+          cat "$CHART_FILE"
+          echo ""
+          echo "Changes that would be made:"
+
+          # Create temporary file to show changes
+          cp "$CHART_FILE" "$CHART_FILE.temp"
+          yq eval '.version = "'$CHART_VERSION'"' -i "$CHART_FILE.temp"
+          yq eval '.appVersion = "'$APP_VERSION'"' -i "$CHART_FILE.temp"
+
+          diff "$CHART_FILE" "$CHART_FILE.temp" || true
+          rm "$CHART_FILE.temp"
+
+          echo "Chart.yaml validation passed (dry run)"
+
+      - name: Update Chart.yaml (Live Mode)
+        if: github.event.inputs.dry_run != 'true'
         run: |
           CHART_NAME="${{ github.event.inputs.chart_name }}"
           CHART_VERSION="${{ github.event.inputs.chart_version }}"
@@ -95,6 +140,22 @@ jobs:
         with:
           version: v3.14.4
 
+      - name: Build Chart Dependencies
+        run: |
+          CHART_NAME="${{ github.event.inputs.chart_name }}"
+          echo "Building chart dependencies for charts/$CHART_NAME..."
+          cd charts/$CHART_NAME
+
+          echo "Chart dependencies:"
+          cat Chart.yaml | grep -A 10 "dependencies:"
+
+          echo "Building dependencies from OCI repositories..."
+          helm dependency build
+
+          echo "Chart dependencies built successfully"
+          echo "Downloaded dependencies:"
+          ls -la charts/ || echo "No charts directory found yet"
+
       - name: Validate Chart
         run: |
           CHART_NAME="${{ github.event.inputs.chart_name }}"
@@ -102,13 +163,20 @@ jobs:
           helm template test-release charts/$CHART_NAME > /dev/null
           echo "Chart validation passed!"
 
-      - name: Commit Changes
+      - name: Commit Changes (Dry Run Preview)
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "DRY RUN: Would commit with message:"
+          echo "Release ${{ github.event.inputs.chart_name }} chart v${{ github.event.inputs.chart_version }}"
+          echo ""
+          echo "Files that would be staged:"
+          echo "  charts/${{ github.event.inputs.chart_name }}/Chart.yaml"
+
+      - name: Commit Changes (Live Mode)
+        if: github.event.inputs.dry_run != 'true'
         run: |
           CHART_NAME="${{ github.event.inputs.chart_name }}"
           CHART_VERSION="${{ github.event.inputs.chart_version }}"
-          APP_VERSION="${{ github.event.inputs.app_version }}"
-          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
-          RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
           git add charts/$CHART_NAME/Chart.yaml
           if git diff --staged --quiet; then
             echo "No changes to commit"
@@ -117,44 +185,65 @@ jobs:
           fi
           git commit -m "Release $CHART_NAME chart v$CHART_VERSION"
 
-      - name: Push Changes
-        if: env.skip_release != 'true'
+      - name: Push Changes (Live Mode Only)
+        if: github.event.inputs.dry_run != 'true' && env.skip_release != 'true'
         run: |
           git push origin main
 
-      - name: Wait for Release Workflow
-        if: env.skip_release != 'true'
+      - name: Wait for Release Workflow (Live Mode Only)
+        if: github.event.inputs.dry_run != 'true' && env.skip_release != 'true'
         run: |
           echo "Waiting for automatic release workflow to process the Chart.yaml change..."
           sleep 30
 
       - name: Success Summary
-        if: env.skip_release != 'true'
         run: |
           CHART_VERSION="${{ github.event.inputs.chart_version }}"
           RELEASE_TYPE="${{ github.event.inputs.release_type }}"
-          echo "Chart Release Completed Successfully!"
-          echo ""
-          echo "Chart: ${{ github.event.inputs.chart_name }}"
-          echo "Version: $CHART_VERSION"
-          echo "Type: $RELEASE_TYPE"
-          echo "App Version: ${{ github.event.inputs.app_version }}"
-          echo ""
-          echo "The automatic release workflow will create the actual GitHub release."
-          echo "Check the Actions tab for the 'Release charts' workflow."
-          echo ""
-          echo "Users can install with:"
-          echo "  helm repo update"
-          echo "  helm install my-hoppscotch hoppscotch/hoppscotch --version $CHART_VERSION"
+
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "DRY RUN COMPLETED SUCCESSFULLY!"
+            echo ""
+            echo "All validations passed. The workflow would:"
+            echo "Update Chart.yaml with version $CHART_VERSION"
+            echo "Update appVersion to ${{ github.event.inputs.app_version }}"
+            echo "Commit changes to main branch"
+            echo "Trigger automatic release workflow"
+            echo ""
+            echo "To perform actual release, run again with 'Dry run mode' unchecked"
+          else
+            if [ "${{ env.skip_release }}" = "true" ]; then
+              echo "No release created - no changes detected"
+            else
+              echo "Chart Release Completed Successfully!"
+              echo ""
+              echo "Chart: ${{ github.event.inputs.chart_name }}"
+              echo "Version: $CHART_VERSION"
+              echo "Type: $RELEASE_TYPE"
+              echo "App Version: ${{ github.event.inputs.app_version }}"
+              echo ""
+              echo "The automatic release workflow will create the actual GitHub release."
+              echo "Check the Actions tab for the 'Release charts' workflow."
+              echo ""
+              echo "Users can install with:"
+              echo "  helm repo update"
+              echo "  helm install my-hoppscotch hoppscotch/hoppscotch --version $CHART_VERSION"
+            fi
+          fi
 
       - name: Failure Summary
         if: failure()
         run: |
-          echo "Chart Release Failed!"
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "DRY RUN FAILED!"
+            echo "Issues found during testing - fix these before doing a live release"
+          else
+            echo "Chart Release Failed!"
+          fi
           echo ""
           echo "Please check the logs above for details."
-          echo "You may need to:"
-          echo "  1. Fix any validation errors"
-          echo "  2. Check Chart.yaml syntax"
-          echo "  3. Ensure version format is correct"
-          echo "  4. Try again with corrected inputs"
+          echo "Common issues:"
+          echo "  1. Invalid version format"
+          echo "  2. Chart validation errors"
+          echo "  3. Git configuration issues"
+          echo "  4. Missing chart files"
