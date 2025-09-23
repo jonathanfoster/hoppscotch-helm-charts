@@ -31,9 +31,44 @@ jobs:
 
       - name: Install yq
         run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+          # Use a more reliable installation method
+          YQ_VERSION="v4.43.1"
+          YQ_BINARY="yq_linux_amd64"
+          YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}"
+
+          echo "Downloading yq from: ${YQ_URL}"
+          wget -qO "${YQ_BINARY}" "${YQ_URL}"
+
+          # Verify the download was successful
+          if [ ! -f "${YQ_BINARY}" ]; then
+            echo "Error: Failed to download yq binary"
+            exit 1
+          fi
+
+          echo "yq binary downloaded successfully"
+          ls -la "${YQ_BINARY}"
+
+          # Make it executable and move to /usr/local/bin
+          chmod +x "${YQ_BINARY}"
+          sudo mv "${YQ_BINARY}" /usr/local/bin/yq
+
+          # Verify installation
+          echo "Verifying yq installation..."
           yq --version
+
+      - name: Validate Inputs
+        run: |
+          CHART_NAME="${{ github.event.inputs.chart_name }}"
+          APP_VERSION="${{ github.event.inputs.app_version }}"
+
+          echo "Chart name: $CHART_NAME"
+          echo "App version: $APP_VERSION"
+
+          # Basic validation for app version format
+          if [[ -z "$APP_VERSION" ]]; then
+            echo "Error: App version cannot be empty"
+            exit 1
+          fi
 
       - name: Update App Version Only
         run: |
@@ -44,11 +79,27 @@ jobs:
 
           if [ ! -f "$CHART_FILE" ]; then
             echo "Chart file not found: $CHART_FILE"
+            echo "Available files in charts directory:"
+            ls -la charts/ || echo "Charts directory not found"
             exit 1
           fi
 
+          echo "Found chart file: $CHART_FILE"
+
           # Get current chart version
           CURRENT_CHART_VERSION=$(yq eval '.version' "$CHART_FILE")
+          CURRENT_APP_VERSION=$(yq eval '.appVersion' "$CHART_FILE")
+
+          echo "Current chart version: $CURRENT_CHART_VERSION"
+          echo "Current app version: $CURRENT_APP_VERSION"
+          echo "New app version: $APP_VERSION"
+
+          # Check if app version is actually changing
+          if [ "$CURRENT_APP_VERSION" = "$APP_VERSION" ]; then
+            echo "App version is already set to $APP_VERSION - no changes needed"
+            echo "skip_commit=true" >> $GITHUB_ENV
+            exit 0
+          fi
 
           # Backup original
           cp "$CHART_FILE" "$CHART_FILE.backup"
@@ -65,6 +116,7 @@ jobs:
           diff "$CHART_FILE.backup" "$CHART_FILE" || true
 
       - name: Commit App Version Update
+        if: env.skip_commit != 'true'
         run: |
           CHART_NAME="${{ github.event.inputs.chart_name }}"
           APP_VERSION="${{ github.event.inputs.app_version }}"
@@ -73,21 +125,47 @@ jobs:
 
           if git diff --staged --quiet; then
             echo "No changes to commit"
+            echo "skip_push=true" >> $GITHUB_ENV
             exit 0
           fi
 
-          git commit -m "Update $CHART_NAME appVersion to $APP_VERSION"
+          git commit -m "Update $CHART_NAME appVersion to $APP_VERSION
+
+          - Chart version unchanged
+          - App compatibility updated to $APP_VERSION
+          - No new chart release triggered"
 
       - name: Push Changes
+        if: env.skip_commit != 'true' && env.skip_push != 'true'
         run: |
+          echo "Pushing changes to main branch..."
           git push origin main
+          echo "Changes pushed successfully"
 
       - name: Summary
         run: |
-          echo "App version updated successfully!"
+          if [ "${{ env.skip_commit }}" = "true" ]; then
+            echo "App version update skipped - version was already set to ${{ github.event.inputs.app_version }}"
+          elif [ "${{ env.skip_push }}" = "true" ]; then
+            echo "No changes were made to push"
+          else
+            echo "App version updated successfully!"
+          fi
           echo ""
           echo "Chart: ${{ github.event.inputs.chart_name }}"
           echo "App Version: ${{ github.event.inputs.app_version }}"
           echo ""
           echo "Chart version was NOT changed - no new release created"
           echo "This update tracks app compatibility without releasing a new chart version"
+
+      - name: Failure Summary
+        if: failure()
+        run: |
+          echo "App version update failed!"
+          echo ""
+          echo "Please check the logs above for details."
+          echo "Common issues:"
+          echo "  1. Chart file not found - check chart name and repository structure"
+          echo "  2. Invalid app version format"
+          echo "  3. Git configuration issues"
+          echo "  4. Permission issues with repository"
