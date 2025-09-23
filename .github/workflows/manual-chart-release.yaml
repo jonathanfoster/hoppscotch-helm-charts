@@ -159,7 +159,7 @@ jobs:
 
           echo "Chart Release Completed Successfully!"
           echo ""
-          echo "Chart: hoppscotch"
+          echo "Chart: ${{ github.event.inputs.chart_name }}"
           echo "Version: $CHART_VERSION"
           echo "Type: $RELEASE_TYPE"
           echo "App Version: ${{ github.event.inputs.app_version }}"
