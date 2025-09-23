@@ -1,0 +1,184 @@
+name: Manual Chart Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      chart_version:
+        description: 'New chart version (e.g., 0.2.0)'
+        required: true
+        type: string
+      app_version:
+        description: 'App version compatibility (e.g., 2025.8.1)'
+        required: true
+        type: string
+      release_type:
+        description: 'Type of release'
+        required: true
+        type: choice
+        default: 'minor'
+        options:
+          - patch
+          - minor
+          - major
+          - hotfix
+      release_notes:
+        description: 'Release notes (what changed in the chart)'
+        required: false
+        type: string
+        default: 'Manual chart release'
+      chart_name:
+        description: 'Chart name to release'
+        required: true
+        type: choice
+        default: 'hoppscotch'
+        options:
+          - hoppscotch
+
+jobs:
+  manual-chart-release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Validate Inputs
+        run: |
+          CHART_VERSION="${{ github.event.inputs.chart_version }}"
+          CHART_NAME="${{ github.event.inputs.chart_name }}"
+
+          # Validate chart version format
+          if [[ ! "$CHART_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid chart version format. Use semantic versioning (e.g., 0.2.0)"
+            exit 1
+          fi
+
+          # Check if chart exists
+          if [ ! -f "charts/$CHART_NAME/Chart.yaml" ]; then
+            echo "Chart not found: charts/$CHART_NAME/Chart.yaml"
+            exit 1
+          fi
+
+          # Get current version and compare
+          CURRENT_VERSION=$(yq eval '.version' "charts/$CHART_NAME/Chart.yaml")
+          echo "Current chart version: $CURRENT_VERSION"
+          echo "New chart version: $CHART_VERSION"
+
+          if [ "$CURRENT_VERSION" = "$CHART_VERSION" ]; then
+            echo "Warning: New version is the same as current version"
+            echo "This will still proceed but may not create a new release"
+          fi
+
+      - name: Update Chart.yaml
+        run: |
+          CHART_NAME="${{ github.event.inputs.chart_name }}"
+          CHART_VERSION="${{ github.event.inputs.chart_version }}"
+          APP_VERSION="${{ github.event.inputs.app_version }}"
+
+          CHART_FILE="charts/$CHART_NAME/Chart.yaml"
+
+          # Backup original
+          cp "$CHART_FILE" "$CHART_FILE.backup"
+
+          # Update both chart version and appVersion
+          yq eval '.version = "'$CHART_VERSION'"' -i "$CHART_FILE"
+          yq eval '.appVersion = "'$APP_VERSION'"' -i "$CHART_FILE"
+
+          echo "Updated $CHART_FILE:"
+          echo "  Chart version: $CHART_VERSION"
+          echo "  App version: $APP_VERSION"
+
+          # Show the changes
+          echo "Changes made:"
+          diff "$CHART_FILE.backup" "$CHART_FILE" || true
+
+      - name: Validate Chart
+        run: |
+          CHART_NAME="${{ github.event.inputs.chart_name }}"
+
+          # Install Helm
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+          # Lint the chart
+          echo "Linting chart..."
+          helm lint charts/$CHART_NAME
+
+          # Test template generation
+          echo "Testing template generation..."
+          helm template test-release charts/$CHART_NAME > /dev/null
+
+          echo "Chart validation passed!"
+
+      - name: Commit Changes
+        run: |
+          CHART_NAME="${{ github.event.inputs.chart_name }}"
+          CHART_VERSION="${{ github.event.inputs.chart_version }}"
+          APP_VERSION="${{ github.event.inputs.app_version }}"
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
+
+          git add charts/$CHART_NAME/Chart.yaml
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            echo "skip_release=true" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          git commit -m "Release $CHART_NAME chart v$CHART_VERSION"
+
+      - name: Push Changes
+        if: env.skip_release != 'true'
+        run: |
+          git push origin main
+
+      - name: Wait for Release Workflow
+        if: env.skip_release != 'true'
+        run: |
+          echo "Waiting for automatic release workflow to process the Chart.yaml change..."
+          sleep 30
+
+      - name: Success Summary
+        if: env.skip_release != 'true'
+        run: |
+          CHART_VERSION="${{ github.event.inputs.chart_version }}"
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+
+          echo "Chart Release Completed Successfully!"
+          echo ""
+          echo "Chart: hoppscotch"
+          echo "Version: $CHART_VERSION"
+          echo "Type: $RELEASE_TYPE"
+          echo "App Version: ${{ github.event.inputs.app_version }}"
+          echo ""
+          echo "The automatic release workflow will create the actual GitHub release."
+          echo "Check the Actions tab for the 'Release charts' workflow."
+          echo ""
+          echo "Users can install with:"
+          echo "  helm repo update"
+          echo "  helm install my-hoppscotch hoppscotch/hoppscotch --version $CHART_VERSION"
+
+      - name: Failure Summary
+        if: failure()
+        run: |
+          echo "Chart Release Failed!"
+          echo ""
+          echo "Please check the logs above for details."
+          echo "You may need to:"
+          echo "  1. Fix any validation errors"
+          echo "  2. Check Chart.yaml syntax"
+          echo "  3. Ensure version format is correct"
+          echo "  4. Try again with corrected inputs"
