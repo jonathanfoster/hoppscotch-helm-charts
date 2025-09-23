@@ -31,7 +31,14 @@ jobs:
 
       - name: Install yq
         run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          YQ_VERSION="v4.43.1"
+          YQ_BINARY="yq_linux_amd64"
+          YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}"
+          YQ_SHA_URL="https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.sha256"
+          wget -qO "${YQ_BINARY}" "${YQ_URL}"
+          wget -qO "${YQ_BINARY}.sha256" "${YQ_SHA_URL}"
+          sha256sum --check --status "${YQ_BINARY}.sha256"
+          sudo mv "${YQ_BINARY}" /usr/local/bin/yq
           sudo chmod +x /usr/local/bin/yq
 
       - name: Update App Version Only
