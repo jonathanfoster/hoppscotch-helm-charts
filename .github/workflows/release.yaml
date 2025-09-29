@@ -1,10 +1,12 @@
 name: Release charts
+
 on:
   push:
     branches:
       - main
     paths:
       - "charts/*/Chart.yaml"
+
 jobs:
   release:
     permissions:
@@ -15,12 +17,75 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Build Chart Dependencies
+        run: |
+          echo "Building dependencies for all charts..."
+          for chart_dir in charts/*/; do
+            if [ -f "${chart_dir}Chart.yaml" ]; then
+              chart_name=$(basename "$chart_dir")
+              echo ""
+              echo "Processing chart: $chart_name"
+              cd "${chart_dir}"
+
+              if grep -q "dependencies:" Chart.yaml; then
+                echo "  Dependencies found, building..."
+                helm dependency build
+                echo "  Dependencies built successfully"
+
+                if [ -d "charts" ]; then
+                  echo "  Downloaded dependencies:"
+                  ls -la charts/
+                fi
+              else
+                echo "  No dependencies to build"
+              fi
+
+              cd - > /dev/null
+            fi
+          done
+          echo ""
+          echo "All chart dependencies built"
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         env:
           CR_SKIP_EXISTING: true
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          charts_dir: charts
+
+      - name: Success Summary
+        if: success()
+        run: |
+          echo "Chart release completed successfully"
+          echo ""
+          echo "The following actions were completed:"
+          echo "  - Chart dependencies built"
+          echo "  - Charts packaged"
+          echo "  - GitHub releases created"
+          echo "  - Helm repository index updated"
+          echo ""
+
+      - name: Failure Summary
+        if: failure()
+        run: |
+          echo "Chart release failed"
+          echo ""
+          echo "Common issues:"
+          echo "  - Dependency build failures"
+          echo "  - Invalid chart structure"
+          echo "  - GitHub token permissions"
+          echo "  - Duplicate release version"
+          echo ""
+          echo "Check the logs above for specific error details"
