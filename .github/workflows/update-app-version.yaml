@@ -14,6 +14,8 @@ on:
         default: 'hoppscotch'
         options:
           - hoppscotch
+          - hoppscotch-community
+          - hoppscotch-enterprise
 
 jobs:
   update-app-version:

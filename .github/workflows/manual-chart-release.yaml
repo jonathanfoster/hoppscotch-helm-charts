@@ -33,6 +33,8 @@ on:
         default: 'hoppscotch'
         options:
           - hoppscotch
+          - hoppscotch-community
+          - hoppscotch-enterprise
 
 jobs:
   manual-chart-release:
