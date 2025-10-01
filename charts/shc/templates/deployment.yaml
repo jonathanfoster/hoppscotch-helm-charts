@@ -38,7 +38,7 @@ spec:
             done
       {{- end }}
       - name: wait-for-migration
-        image: bitnami/kubectl:latest
+        image: alpine/kubectl:latest
         command:
           - /bin/sh
           - -c
