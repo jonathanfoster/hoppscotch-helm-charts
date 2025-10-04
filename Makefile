@@ -101,7 +101,7 @@ help: ## Show this help message
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Available Targets:"
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_0-9-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: install-deps
 install-deps: ## Install dependencies
@@ -228,6 +228,9 @@ lint-yaml: ## Lint YAML files
 .PHONY: pre-commit
 pre-commit: fmt lint test-unit ## Run pre-commit hooks
 
+.PHONY: test
+test: test-unit test-e2e ## Run all tests
+
 .PHONY: test-e2e
 test-e2e: ## Run end-to-end tests
 	@echo "Running end-to-end tests for ${CHART_NAME} chart"
@@ -240,6 +243,3 @@ test-integration: helm-test ## Run integration tests
 test-unit: ## Run unit tests
 	@echo "Running unit tests"
 	helm unittest charts/*
-
-.PHONY: test
-test: test-unit test-e2e ## Run all tests
