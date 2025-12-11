@@ -2,5 +2,5 @@ apiVersion: v2
 name: hoppscotch-community
 description: A Helm chart for Hoppscotch Community Edition
 type: application
-version: 0.1.6
-appVersion: "2025.11.1"
+version: 0.1.7
+appVersion: "2025.11.2"
