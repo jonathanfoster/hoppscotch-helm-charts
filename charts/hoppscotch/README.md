@@ -1,7 +1,7 @@
 # Hoppscotch Helm Chart
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square)
-![AppVersion: 2025.7.1](https://img.shields.io/badge/AppVersion-2025.7.1-informational?style=flat-square)
+![Version: 0.2.5](https://img.shields.io/badge/Version-0.2.5-informational?style=flat-square)
+![AppVersion: 2025.12.0](https://img.shields.io/badge/AppVersion-2025.12.0-informational?style=flat-square)
 
 Hoppscotch is a lightweight, web-based API development suite. It was built from the ground up with ease of use and
 accessibility in mind providing all the functionality needed for developers with minimalist, unobtrusive UI.
@@ -279,7 +279,7 @@ precedence of these methods is as follows (from highest to lowest):
 Extra env vars, secret, and configmap must be specified in container parameter sections (e.g. `aio`, `frontend`,
 `backend`, `admin`)
 
-Note: Config order of precedence is driven by Kubernetes, not this chart. See
+Note: Config order of precedence is driven by Kubernetes. See
 [Environment Variables in Kubernetes Pod](https://www.baeldung.com/ops/kubernetes-pod-environment-variables#1-order-of-precedence)
 for more info.
 
@@ -920,10 +920,13 @@ unique for each release. This allows the job to be run multiple times without co
 
 ### Default Init Containers Parameters
 
-| Key                                             | Type | Default | Description                                                 |
-| ----------------------------------------------- | ---- | ------- | ----------------------------------------------------------- |
-| defaultInitContainers.waitForDatabase.enabled   | bool | `true`  | Enable init container that waits for database to be ready   |
-| defaultInitContainers.waitForMigrations.enabled | bool | `true`  | Enable init container that waits for migrations to complete |
+| Key                                                    | Type   | Default          | Description                                                 |
+| ------------------------------------------------------ | ------ | ---------------- | ----------------------------------------------------------- |
+| defaultInitContainers.waitForDatabase.enabled          | bool   | `true`           | Enable init container that waits for database to be ready   |
+| defaultInitContainers.waitForDatabase.image.repository | string | `"postgres"`     | Wait for database image repository                          |
+| defaultInitContainers.waitForDatabase.image.pullPolicy | string | `"IfNotPresent"` | Wait for database image pull policy                         |
+| defaultInitContainers.waitForDatabase.image.tag        | string | `"16-alpine"`    | Wait for database image tag                                 |
+| defaultInitContainers.waitForMigrations.enabled        | bool   | `true`           | Enable init container that waits for migrations to complete |
 
 ### Other Parameters
 

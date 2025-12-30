@@ -1725,6 +1725,16 @@ defaultInitContainers:
     # -- Enable init container that waits for database to be ready
     # @section -- Default Init Containers Parameters
     enabled: true
+    image:
+      # -- Wait for database image repository
+      # @section -- Default Init Containers Parameters
+      repository: postgres
+      # -- Wait for database image pull policy
+      # @section -- Default Init Containers Parameters
+      pullPolicy: IfNotPresent
+      # -- Wait for database image tag
+      # @section -- Default Init Containers Parameters
+      tag: 16-alpine
 
   waitForMigrations:
     # -- Enable init container that waits for migrations to complete

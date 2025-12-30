@@ -1,4 +1,4 @@
-suite: Default Init Containers
+suite: Default Init Container Wait for Migrations
 templates:
   - aio/deployment.yaml
   - backend/deployment.yaml
@@ -7,39 +7,7 @@ templates:
 values:
   - ../values.yaml
 tests:
-  - it: should generate wait for database init container when enabled
-    template: aio/deployment.yaml
-    set:
-      defaultInitContainers:
-        waitForDatabase:
-          enabled: true
-    asserts:
-      - containsDocument:
-          apiVersion: apps/v1
-          kind: Deployment
-      - contains:
-          path: spec.template.spec.initContainers
-          content:
-            name: wait-for-db
-          any: true
-
-  - it: should not generate wait for database init container when disabled
-    template: aio/deployment.yaml
-    set:
-      defaultInitContainers:
-        waitForDatabase:
-          enabled: false
-    asserts:
-      - containsDocument:
-          apiVersion: apps/v1
-          kind: Deployment
-      - notContains:
-          path: spec.template.spec.initContainers
-          content:
-            name: wait-for-db
-          any: true
-
-  - it: should generate wait for migrations init container when enabled
+  - it: should generate init container when enabled
     template: aio/deployment.yaml
     set:
       defaultInitContainers:
@@ -55,7 +23,7 @@ tests:
             name: wait-for-migrations
           any: true
 
-  - it: should not generate wait for migrations init container when disabled
+  - it: should not generate init container when disabled
     template: aio/deployment.yaml
     set:
       defaultInitContainers:
@@ -71,7 +39,7 @@ tests:
             name: wait-for-migrations
           any: true
 
-  - it: should generate wait for database migration init container with aio image when deployment mode is aio
+  - it: should set container image to aio image when deployment mode is aio
     template: aio/deployment.yaml
     set:
       deploymentMode: aio
@@ -93,7 +61,7 @@ tests:
             image: hoppscotch/hoppscotch:latest
           any: true
 
-  - it: should generate wait for database migration init container with backend image when deployment mode is not aio
+  - it: should set container image to backend image when deployment mode is not aio
     template: backend/deployment.yaml
     set:
       deploymentMode: distributed
@@ -113,4 +81,46 @@ tests:
           content:
             name: wait-for-migrations
             image: hoppscotch/hoppscotch-backend:latest
+          any: true
+
+  - it: should set container image pull policy to aio image pull policy when deployment mode is aio
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        image:
+          pullPolicy: Always
+      defaultInitContainers:
+        waitForMigrations:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-migrations
+            imagePullPolicy: Always
+          any: true
+
+  - it: should set container image pull policy to backend image pull policy when deployment mode is not aio
+    template: backend/deployment.yaml
+    set:
+      deploymentMode: distributed
+      backend:
+        image:
+          pullPolicy: Always
+      defaultInitContainers:
+        waitForMigrations:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-migrations
+            imagePullPolicy: Always
           any: true

@@ -3,7 +3,8 @@ Default init container that waits for the database to be ready.
 */}}
 {{- define "hoppscotch.defaultInitContainers.waitForDatabase" -}}
 - name: wait-for-db
-  image: postgres:16-alpine
+  image: {{ include "hoppscotch.images.image" (dict "component" .Values.defaultInitContainers.waitForDatabase "context" .) }}
+  imagePullPolicy: {{ .Values.defaultInitContainers.waitForDatabase.image.pullPolicy }}
   command:
     - /bin/sh
   args:
