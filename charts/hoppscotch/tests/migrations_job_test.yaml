@@ -124,6 +124,40 @@ tests:
             imagePullPolicy: IfNotPresent
           any: true
 
+  - it: should use aio image pull policy when deployment mode is aio
+    template: migrations/job.yaml
+    set:
+      deploymentMode: aio
+      aio:
+        image:
+          pullPolicy: Always
+      migrations:
+        enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: batch/v1
+          kind: Job
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+
+  - it: should use backend image pull policy when deployment mode is not aio
+    template: migrations/job.yaml
+    set:
+      deploymentMode: distributed
+      backend:
+        image:
+          pullPolicy: Always
+      migrations:
+        enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: batch/v1
+          kind: Job
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+
   - it: should append the release revision to the job name
     template: migrations/job.yaml
     release:
