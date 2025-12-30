@@ -33,11 +33,16 @@ Usage: {{ include "hoppscotch.hasCertManagerRequest" ( dict "annotations" .Value
 {{- end -}}
 
 {{/*
-Image name and tag for component resources. Chart app version is used as a default tag if not specified.
+Return the Hoppscotch container image name with tag. Chart app version is used as a default tag if not specified. This
+helper is intended to be used for Hoppscotch components only. For all other components use `hoppscotch.images.image`.
 Usage: {{ include "hoppscotch.image" (dict "component" .Values.frontend "context" .) }}
 */}}
 {{- define "hoppscotch.image" -}}
-  {{- printf "%s:%s" .component.image.repository (default .context.Chart.AppVersion .component.image.tag) -}}
+  {{- $componentWithTag := .component -}}
+  {{- if not .component.image.tag -}}
+    {{- $componentWithTag = mergeOverwrite (deepCopy .component) (dict "image" (dict "tag" .context.Chart.AppVersion)) -}}
+  {{- end -}}
+  {{- include "hoppscotch.images.image" (dict "component" $componentWithTag "context" .context) -}}
 {{- end -}}
 
 {{/*
