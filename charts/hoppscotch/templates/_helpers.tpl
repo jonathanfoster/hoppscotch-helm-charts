@@ -41,6 +41,30 @@ Usage: {{ include "hoppscotch.image" (dict "component" .Values.frontend "context
 {{- end -}}
 
 {{/*
+Return the container image name. The global image registry is used if specified. If no tag is provided, only the image
+name is returned without a tag defaulting to `latest`.
+Usage: {{ include "hoppscotch.images.image" (dict "component" .Values.frontend "context" .) }}
+*/}}
+{{- define "hoppscotch.images.image" -}}
+  {{- $registry := .component.image.registry | default .context.Values.global.imageRegistry -}}
+  {{- $repository := .component.image.repository -}}
+  {{- $tag := .component.image.tag -}}
+  {{- if $registry -}}
+    {{- if $tag -}}
+      {{- printf "%s/%s:%s" $registry $repository $tag -}}
+    {{- else -}}
+      {{- printf "%s/%s" $registry $repository -}}
+    {{- end -}}
+  {{- else -}}
+    {{- if $tag -}}
+      {{- printf "%s:%s" $repository $tag -}}
+    {{- else -}}
+      {{- $repository -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
 Generate base URL from ingress resource
 Usage: {{ include "hoppscotch.ingressBaseUrl" .Values.aio.ingress }}
 */}}
