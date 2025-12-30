@@ -6,6 +6,8 @@ CHART_NAMESPACE?=default
 CHART_VALUES?=charts/${CHART_NAME}/ci/default-values.yaml
 CLUSTER_NAME?=helm-charts
 TEST_E2E_DIR:=test/e2e
+TEST_UNIT_FILES?=tests/*_test.yaml
+TEST_UNIT_CHARTS?=charts/*
 
 .PHONY: clean
 clean: ## Clean up temporary resources
@@ -242,4 +244,4 @@ test-integration: helm-test ## Run integration tests
 .PHONY: test-unit
 test-unit: ## Run unit tests
 	@echo "Running unit tests"
-	helm unittest charts/*
+	helm unittest -f ${TEST_UNIT_FILES} ${TEST_UNIT_CHARTS}
