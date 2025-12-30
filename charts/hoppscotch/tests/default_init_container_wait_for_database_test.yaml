@@ -1,0 +1,183 @@
+suite: Default Init Container Wait for Database
+templates:
+  - aio/deployment.yaml
+  - backend/deployment.yaml
+  - configmap.yaml
+  - secrets.yaml
+values:
+  - ../values.yaml
+tests:
+  - it: should generate init container when enabled
+    template: aio/deployment.yaml
+    set:
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+          any: true
+
+  - it: should not generate init container when disabled
+    template: aio/deployment.yaml
+    set:
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: false
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - notContains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+          any: true
+
+  - it: should set container image to postgres by default
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+            image: postgres:16-alpine
+          any: true
+
+  - it: should set container image to component image when specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+          image:
+            repository: custom/postgres
+            tag: 18-alpine
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+            image: custom/postgres:18-alpine
+          any: true
+
+  - it: should set container image to component registry when specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+          image:
+            registry: component-registry.example.com
+            repository: postgres
+            tag: 16-alpine
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+            image: component-registry.example.com/postgres:16-alpine
+          any: true
+
+  - it: should set container image with global registry when specified
+    template: aio/deployment.yaml
+    set:
+      global:
+        imageRegistry: global-registry.example.com
+      deploymentMode: aio
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+          image:
+            repository: postgres
+            tag: 16-alpine
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+            image: global-registry.example.com/postgres:16-alpine
+          any: true
+
+  - it: should set container image without tag when component tag is empty
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+          image:
+            repository: postgres
+            tag: ""
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+            image: postgres
+          any: true
+
+  - it: should set container image pull policy to `IfNotPresent` by default
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+            imagePullPolicy: IfNotPresent
+          any: true
+
+  - it: should set container image pull policy to component image pull policy when specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+          image:
+            pullPolicy: Always
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+            imagePullPolicy: Always
+          any: true
