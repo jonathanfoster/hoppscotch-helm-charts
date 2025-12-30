@@ -1718,6 +1718,22 @@ migrations:
   # @section -- Hoppscotch Migrations Container Parameters
   resources: {}
 
+  # -- Node labels for Hoppscotch pods assignment
+  # @section -- Hoppscotch Migrations Container Parameters
+  nodeSelector: {}
+
+  # -- Tolerations for Hoppscotch pods assignment
+  # @section -- Hoppscotch Migrations Container Parameters
+  tolerations: []
+
+  # -- Affinity for Hoppscotch pods assignment
+  # @section -- Hoppscotch Migrations Container Parameters
+  affinity: {}
+
+  # -- Topology spread constraints for Hoppscotch pods assignment
+  # @section -- Hoppscotch Migrations Container Parameters
+  topologySpreadConstraints: []
+
 # @section -- Default Init Containers Parameters
 
 defaultInitContainers:

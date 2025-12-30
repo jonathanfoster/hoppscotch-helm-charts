@@ -909,14 +909,18 @@ unique for each release. This allows the job to be run multiple times without co
 
 ### Hoppscotch Migrations Container Parameters
 
-| Key                           | Type   | Default  | Description                                                                                                          |
-| ----------------------------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| migrations.enabled            | bool   | `true`   | Enable database migrations job                                                                                       |
-| migrations.extraEnvVars       | list   | `[]`     | Array of extra environment variables to be added to Hoppscotch containers                                            |
-| migrations.extraEnvVarsCM     | string | `""`     | Name of existing ConfigMap containing extra environment variables                                                    |
-| migrations.extraEnvVarsSecret | string | `""`     | Name of existing Secret containing extra environment variables                                                       |
-| migrations.resourcesPreset    | string | `"nano"` | Set container resources according to one common preset (allowed values: nano, small, medium, large, xlarge, 2xlarge) |
-| migrations.resources          | object | `{}`     | Set container resources for Hoppscotch (overrides resourcesPreset)                                                   |
+| Key                                  | Type   | Default  | Description                                                                                                          |
+| ------------------------------------ | ------ | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| migrations.enabled                   | bool   | `true`   | Enable database migrations job                                                                                       |
+| migrations.extraEnvVars              | list   | `[]`     | Array of extra environment variables to be added to Hoppscotch containers                                            |
+| migrations.extraEnvVarsCM            | string | `""`     | Name of existing ConfigMap containing extra environment variables                                                    |
+| migrations.extraEnvVarsSecret        | string | `""`     | Name of existing Secret containing extra environment variables                                                       |
+| migrations.resourcesPreset           | string | `"nano"` | Set container resources according to one common preset (allowed values: nano, small, medium, large, xlarge, 2xlarge) |
+| migrations.resources                 | object | `{}`     | Set container resources for Hoppscotch (overrides resourcesPreset)                                                   |
+| migrations.nodeSelector              | object | `{}`     | Node labels for Hoppscotch pods assignment                                                                           |
+| migrations.tolerations               | list   | `[]`     | Tolerations for Hoppscotch pods assignment                                                                           |
+| migrations.affinity                  | object | `{}`     | Affinity for Hoppscotch pods assignment                                                                              |
+| migrations.topologySpreadConstraints | list   | `[]`     | Topology spread constraints for Hoppscotch pods assignment                                                           |
 
 ### Default Init Containers Parameters
 
