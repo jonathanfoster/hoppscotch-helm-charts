@@ -1,11 +1,11 @@
 suite: Config Map
 templates:
-  - configmap.yaml
+  - config/configmap.yaml
 values:
   - ../values.yaml
 tests:
   - it: should render frontend parameters when explicitly set
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       hoppscotch:
         frontend:
@@ -54,7 +54,7 @@ tests:
           value: "true"
 
   - it: should render backend parameters when explicitly set
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       hoppscotch:
         backend:
@@ -190,7 +190,7 @@ tests:
           value: "100"
 
   - it: should render enterprise parameters when explicitly set
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       hoppscotch:
         frontend:
@@ -321,7 +321,7 @@ tests:
           path: data.REDIS_URL
 
   - it: should default custom SMTP port to 587
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       hoppscotch:
         backend:
@@ -336,7 +336,7 @@ tests:
           value: "587"
 
   - it: should generate auth callback URL for GitHub when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -354,7 +354,7 @@ tests:
           value: https://example.com/backend/v1/auth/github/callback
 
   - it: should generate auth callback URL for GitHub when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -381,7 +381,7 @@ tests:
           value: https://backend.example.com/v1/auth/github/callback
 
   - it: should generate auth callback URL for Google when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -399,7 +399,7 @@ tests:
           value: https://example.com/backend/v1/auth/google/callback
 
   - it: should generate auth callback URL for Google when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -426,7 +426,7 @@ tests:
           value: https://backend.example.com/v1/auth/google/callback
 
   - it: should generate auth callback URL for Microsoft when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -444,7 +444,7 @@ tests:
           value: https://example.com/backend/v1/auth/microsoft/callback
 
   - it: should generate auth callback URL for Microsoft when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -471,7 +471,7 @@ tests:
           value: https://backend.example.com/v1/auth/microsoft/callback
 
   - it: should generate auth callback URL for OIDC when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -489,7 +489,7 @@ tests:
           value: https://example.com/backend/v1/auth/oidc/callback
 
   - it: should generate auth callback URL for OIDC when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -516,7 +516,7 @@ tests:
           value: https://backend.example.com/v1/auth/oidc/callback
 
   - it: should generate auth callback URL for SAML when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -534,7 +534,7 @@ tests:
           value: https://example.com/backend/v1/auth/saml/callback
 
   - it: should generate auth callback URL for SAML when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -561,7 +561,7 @@ tests:
           value: https://backend.example.com/v1/auth/saml/callback
 
   - it: should generate backend redirect URL when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -579,7 +579,7 @@ tests:
           value: https://example.com
 
   - it: should generate backend redirect URL when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -606,7 +606,7 @@ tests:
           value: https://frontend.example.com
 
   - it: should generate backend whitelisted origins when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -624,7 +624,7 @@ tests:
           value: https://example.com,app://example_com,http://app.example_com
 
   - it: should generate backend whitelisted origins when deployment mode is aio and ingress is not enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -642,7 +642,7 @@ tests:
           value: ""
 
   - it: should generate backend whitelisted origins when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -670,7 +670,7 @@ tests:
           value: https://frontend.example.com,app://frontend_example_com,http://app.frontend_example_com,https://backend.example.com,https://admin.example.com
 
   - it: should generate frontend admin URL when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -688,7 +688,7 @@ tests:
           value: https://example.com/admin
 
   - it: should generate frontend admin URL when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -715,7 +715,7 @@ tests:
           value: https://admin.example.com
 
   - it: should generate frontend backend API URL when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -733,7 +733,7 @@ tests:
           value: https://example.com/backend/v1
 
   - it: should generate frontend backend API URL when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -760,7 +760,7 @@ tests:
           value: https://backend.example.com/v1
 
   - it: should generate frontend backend GraphQL URL when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -778,7 +778,7 @@ tests:
           value: https://example.com/backend/graphql
 
   - it: should generate frontend backend GraphQL URL when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -805,7 +805,7 @@ tests:
           value: https://backend.example.com/graphql
 
   - it: should generate frontend backend WebSocket URL when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -823,7 +823,7 @@ tests:
           value: wss://example.com/backend/graphql
 
   - it: should generate frontend backend WebSocket URL when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -850,7 +850,7 @@ tests:
           value: wss://backend.example.com/graphql
 
   - it: should generate frontend base URL when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -868,7 +868,7 @@ tests:
           value: https://example.com
 
   - it: should generate frontend base URL when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -895,7 +895,7 @@ tests:
           value: https://frontend.example.com
 
   - it: should generate frontend shortcode base URL when deployment mode is aio and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       aio:
@@ -913,7 +913,7 @@ tests:
           value: https://example.com
 
   - it: should generate frontend shortcode base URL when deployment mode is distributed and ingress is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       frontend:
@@ -940,7 +940,7 @@ tests:
           value: https://frontend.example.com
 
   - it: should enable subpath based access when deployment mode is aio and subpath based access is enabled
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: aio
       hoppscotch:
@@ -955,7 +955,7 @@ tests:
           value: "true"
 
   - it: should disable subpath based access when deployment mode is not aio
-    template: configmap.yaml
+    template: config/configmap.yaml
     set:
       deploymentMode: distributed
       hoppscotch:

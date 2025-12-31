@@ -2,8 +2,8 @@ suite: Frontend PDB
 templates:
   - frontend/deployment.yaml
   - frontend/pdb.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

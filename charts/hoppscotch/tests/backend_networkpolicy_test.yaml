@@ -1,9 +1,9 @@
 suite: Backend Network Policy
 templates:
   - backend/networkpolicy.yaml
-  - configmap.yaml
+  - config/configmap.yaml
   - deployment.yaml
-  - secrets.yaml
+  - config/secret.yaml
   - service.yaml
 values:
   - ../values.yaml

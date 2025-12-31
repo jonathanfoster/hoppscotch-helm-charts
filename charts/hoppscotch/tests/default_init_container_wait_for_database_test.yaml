@@ -2,8 +2,8 @@ suite: Default Init Container Wait for Database
 templates:
   - aio/deployment.yaml
   - backend/deployment.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

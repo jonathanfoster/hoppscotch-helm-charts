@@ -2,8 +2,8 @@ suite: AIO Ingress
 templates:
   - aio/deployment.yaml
   - aio/ingress.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

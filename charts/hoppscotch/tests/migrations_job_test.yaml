@@ -1,7 +1,7 @@
 suite: Migrations Job
 templates:
   - migrations/job.yaml
-  - secrets.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

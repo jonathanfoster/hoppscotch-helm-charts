@@ -2,8 +2,8 @@ suite: AIO PVC
 templates:
   - aio/deployment.yaml
   - aio/pvc.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

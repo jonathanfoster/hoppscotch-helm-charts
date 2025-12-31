@@ -3,8 +3,8 @@ templates:
   - backend/deployment.yaml
   - backend/ingress.yaml
   - backend/service.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

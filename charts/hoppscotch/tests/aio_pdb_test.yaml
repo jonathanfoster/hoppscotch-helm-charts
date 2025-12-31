@@ -2,8 +2,8 @@ suite: AIO PDB
 templates:
   - aio/deployment.yaml
   - aio/pdb.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

@@ -1,8 +1,8 @@
 suite: Admin Deployment
 templates:
   - admin/deployment.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

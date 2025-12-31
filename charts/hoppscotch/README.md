@@ -320,8 +320,8 @@ To use an existing secret:
 existingSecret: my-existing-secret
 ```
 
-Note: The existing secret must contain all required keys. See [templates/secrets.yaml](templates/secrets.yaml) for more
-info.
+Note: The existing secret must contain all required keys. See
+[templates/config/secret.yaml](templates/config/secret.yaml) for more info.
 
 ## Waiting for Database Readiness
 

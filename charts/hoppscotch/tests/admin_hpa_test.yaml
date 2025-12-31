@@ -2,8 +2,8 @@ suite: Admin HPA
 templates:
   - admin/deployment.yaml
   - admin/hpa.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

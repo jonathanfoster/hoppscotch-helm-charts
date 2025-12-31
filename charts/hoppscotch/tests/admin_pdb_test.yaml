@@ -2,8 +2,8 @@ suite: Admin PDB
 templates:
   - admin/deployment.yaml
   - admin/pdb.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

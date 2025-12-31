@@ -2,8 +2,8 @@ suite: Backend Service Monitor
 templates:
   - backend/deployment.yaml
   - backend/servicemonitor.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

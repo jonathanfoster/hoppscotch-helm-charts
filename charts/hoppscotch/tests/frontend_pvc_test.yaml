@@ -2,8 +2,8 @@ suite: Frontend PVC
 templates:
   - frontend/deployment.yaml
   - frontend/pvc.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

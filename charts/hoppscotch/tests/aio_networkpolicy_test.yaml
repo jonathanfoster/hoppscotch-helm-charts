@@ -1,9 +1,9 @@
 suite: AIO Network Policy
 templates:
   - aio/networkpolicy.yaml
-  - configmap.yaml
+  - config/configmap.yaml
   - deployment.yaml
-  - secrets.yaml
+  - config/secret.yaml
   - service.yaml
 values:
   - ../values.yaml

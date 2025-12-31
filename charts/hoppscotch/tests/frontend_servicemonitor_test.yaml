@@ -2,8 +2,8 @@ suite: Frontend Service Monitor
 templates:
   - frontend/deployment.yaml
   - frontend/servicemonitor.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

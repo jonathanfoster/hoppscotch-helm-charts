@@ -2,8 +2,8 @@ suite: AIO Service
 templates:
   - aio/deployment.yaml
   - aio/service.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:

@@ -2,8 +2,8 @@ suite: AIO HPA
 templates:
   - aio/deployment.yaml
   - aio/hpa.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 values:
   - ../values.yaml
 tests:
