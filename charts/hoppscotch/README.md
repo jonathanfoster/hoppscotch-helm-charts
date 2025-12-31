@@ -924,13 +924,19 @@ unique for each release. This allows the job to be run multiple times without co
 
 ### Default Init Containers Parameters
 
-| Key                                                    | Type   | Default          | Description                                                 |
-| ------------------------------------------------------ | ------ | ---------------- | ----------------------------------------------------------- |
-| defaultInitContainers.waitForDatabase.enabled          | bool   | `true`           | Enable init container that waits for database to be ready   |
-| defaultInitContainers.waitForDatabase.image.repository | string | `"postgres"`     | Wait for database image repository                          |
-| defaultInitContainers.waitForDatabase.image.pullPolicy | string | `"IfNotPresent"` | Wait for database image pull policy                         |
-| defaultInitContainers.waitForDatabase.image.tag        | string | `"16-alpine"`    | Wait for database image tag                                 |
-| defaultInitContainers.waitForMigrations.enabled        | bool   | `true`           | Enable init container that waits for migrations to complete |
+| Key                                                        | Type   | Default          | Description                                                                                                         |
+| ---------------------------------------------------------- | ------ | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+| defaultInitContainers.waitForDatabase.enabled              | bool   | `true`           | Enable init container that waits for database to be ready                                                           |
+| defaultInitContainers.waitForDatabase.image.repository     | string | `"postgres"`     | Wait for database image repository                                                                                  |
+| defaultInitContainers.waitForDatabase.image.pullPolicy     | string | `"IfNotPresent"` | Wait for database image pull policy                                                                                 |
+| defaultInitContainers.waitForDatabase.image.tag            | string | `"16-alpine"`    | Wait for database image tag                                                                                         |
+| defaultInitContainers.waitForDatabase.extraEnvVars         | list   | `[]`             | Array of extra environment variables to be added to wait for database containers                                    |
+| defaultInitContainers.waitForDatabase.extraEnvVarsCM       | string | `""`             | Name of the existing ConfigMap containing extra environment variables to be added to wait for database containers   |
+| defaultInitContainers.waitForDatabase.extraEnvVarsSecret   | string | `""`             | Name of existing Secret containing extra environment variables to be added to wait for database containers          |
+| defaultInitContainers.waitForMigrations.enabled            | bool   | `true`           | Enable init container that waits for migrations to complete                                                         |
+| defaultInitContainers.waitForMigrations.extraEnvVars       | list   | `[]`             | Array of extra environment variables to be added to wait for migrations containers                                  |
+| defaultInitContainers.waitForMigrations.extraEnvVarsCM     | string | `""`             | Name of the existing ConfigMap containing extra environment variables to be added to wait for migrations containers |
+| defaultInitContainers.waitForMigrations.extraEnvVarsSecret | string | `""`             | Name of existing Secret containing extra environment variables to be added to wait for migrations containers        |
 
 ### Other Parameters
 
