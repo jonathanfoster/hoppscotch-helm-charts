@@ -181,3 +181,68 @@ tests:
             name: wait-for-db
             imagePullPolicy: Always
           any: true
+
+  - it: should set extra env vars when specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+          extraEnvVars:
+            - name: EXTRA_ENV_VAR_1
+              value: value_1
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+            env:
+              - name: EXTRA_ENV_VAR_1
+                value: value_1
+          any: true
+
+  - it: should set extra env vars config map when specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+          extraEnvVarsCM: extra-env-vars-config-map
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - notContains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+            envFrom:
+              - configMapRef:
+                  name: extra-env-vars-config-map
+          any: true
+
+  - it: should set extra env vars secret when specified
+    template: aio/deployment.yaml
+    set:
+      deploymentMode: aio
+      defaultInitContainers:
+        waitForDatabase:
+          enabled: true
+          extraEnvVarsSecret: env-vars-secret
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+      - notContains:
+          path: spec.template.spec.initContainers
+          content:
+            name: wait-for-db
+            envFrom:
+              - secretRef:
+                  name: env-vars-secret
+          any: true

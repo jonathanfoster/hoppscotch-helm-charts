@@ -1741,6 +1741,7 @@ defaultInitContainers:
     # -- Enable init container that waits for database to be ready
     # @section -- Default Init Containers Parameters
     enabled: true
+
     image:
       # -- Wait for database image repository
       # @section -- Default Init Containers Parameters
@@ -1752,10 +1753,30 @@ defaultInitContainers:
       # @section -- Default Init Containers Parameters
       tag: 16-alpine
 
+    # -- Array of extra environment variables to be added to wait for database containers
+    # @section -- Default Init Containers Parameters
+    extraEnvVars: []
+    # -- Name of the existing ConfigMap containing extra environment variables to be added to wait for database containers
+    # @section -- Default Init Containers Parameters
+    extraEnvVarsCM: ""
+    # -- Name of existing Secret containing extra environment variables to be added to wait for database containers
+    # @section -- Default Init Containers Parameters
+    extraEnvVarsSecret: ""
+
   waitForMigrations:
     # -- Enable init container that waits for migrations to complete
     # @section -- Default Init Containers Parameters
     enabled: true
+
+    # -- Array of extra environment variables to be added to wait for migrations containers
+    # @section -- Default Init Containers Parameters
+    extraEnvVars: []
+    # -- Name of the existing ConfigMap containing extra environment variables to be added to wait for migrations containers
+    # @section -- Default Init Containers Parameters
+    extraEnvVarsCM: ""
+    # -- Name of existing Secret containing extra environment variables to be added to wait for migrations containers
+    # @section -- Default Init Containers Parameters
+    extraEnvVarsSecret: ""
 
 # @section -- Other Parameters
 
