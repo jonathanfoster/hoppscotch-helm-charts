@@ -230,6 +230,9 @@ lint-yaml: ## Lint YAML files
 .PHONY: pre-commit
 pre-commit: helm-docs fmt lint test-unit ## Run pre-commit hooks
 
+.PHONY: pre-commit-fix
+pre-commit-fix: helm-docs fmt-fix lint test-unit ## Run pre-commit hooks with fixes
+
 .PHONY: test
 test: test-unit test-e2e ## Run all tests
 
