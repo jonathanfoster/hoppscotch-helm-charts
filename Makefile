@@ -146,6 +146,8 @@ install-deps-linux: ## Install dependencies for Linux
 	go install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
 	@echo "Installing kind"
 	go install sigs.k8s.io/kind@latest
+	@echo "Installing kubeconform"
+	go install github.com/yannh/kubeconform/cmd/kubeconform@latest
 	@echo "Installing markdownlint-cli"
 	npm install -g markdownlint-cli
 	@echo "Installing prettier"
@@ -176,6 +178,7 @@ install-deps-macos: ## Install dependencies for MacOS
 	fi
 	brew install norwoodj/tap/helm-docs
 	brew install kind
+	brew install kubeconform
 	brew install markdownlint-cli
 	brew install prettier
 	brew install shellcheck
@@ -212,6 +215,11 @@ lint-helm: ## Lint Helm charts
 	@echo "Linting Helm charts"
 	ct lint --config=ct.yaml --lint-conf=lintconf.yaml --all
 
+.PHONY: lint-manifests
+lint-manifests: ## Lint rendered chart manifests
+	@echo "Linting rendered chart manifests"
+	kubeconform -summary ${BUILD_DIR}/*.yaml
+
 .PHONY: lint-markdown
 lint-markdown: ## Lint Markdown files
 	@echo "Linting Markdown files"
@@ -228,10 +236,10 @@ lint-yaml: ## Lint YAML files
 	yamllint .
 
 .PHONY: pre-commit
-pre-commit: helm-docs fmt lint test-unit ## Run pre-commit hooks
+pre-commit: helm-docs fmt lint test-unit helm-template lint-manifests ## Run pre-commit hooks
 
 .PHONY: pre-commit-fix
-pre-commit-fix: helm-docs fmt-fix lint test-unit ## Run pre-commit hooks with fixes
+pre-commit-fix: helm-docs fmt-fix lint test-unit helm-template lint-manifests ## Run pre-commit hooks with fixes
 
 .PHONY: test
 test: test-unit test-e2e ## Run all tests
