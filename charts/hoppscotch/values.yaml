@@ -1828,6 +1828,10 @@ postgresql:
     # -- Existing secret containing PostgreSQL credentials
     # @section -- Database Parameters
     existingSecret: ""
+    secretKeys:
+      # -- Key in existing secret containing username
+      # @section -- Database Parameters
+      userPasswordKey: ""
   # -- PostgreSQL architecture (standalone or replication)
   # @section -- Database Parameters
   architecture: standalone
