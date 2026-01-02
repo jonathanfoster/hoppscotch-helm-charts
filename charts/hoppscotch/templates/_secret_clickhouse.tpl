@@ -2,12 +2,13 @@
 Return the ClickHouse host based on the ClickHouse chart or external ClickHouse settings
 */}}
 {{- define "hoppscotch.secret.clickhouseHost" -}}
+  {{- $defaultPort := 8123 -}}
   {{- if .Values.clickhouse.enabled -}}
-    {{- printf "%s-clickhouse.%s.svc.%s:8123" .Release.Name (include "hoppscotch.namespace" .) .Values.clusterDomain -}}
+    {{- $namespace := include "hoppscotch.namespace" . -}}
+    {{- printf "%s-clickhouse.%s.svc.%s:%d" .Release.Name $namespace .Values.clusterDomain $defaultPort -}}
   {{- else if .Values.externalClickhouse.host -}}
-    {{- printf "%s:%d" .Values.externalClickhouse.host (.Values.externalClickhouse.port | int) -}}
-  {{- else -}}
-    {{- "" -}}
+    {{- $port := .Values.externalClickhouse.port | default $defaultPort | int -}}
+    {{- printf "%s:%d" .Values.externalClickhouse.host $port -}}
   {{- end -}}
 {{- end -}}
 
@@ -15,18 +16,18 @@ Return the ClickHouse host based on the ClickHouse chart or external ClickHouse 
 Return the ClickHouse password based on the ClickHouse chart or external ClickHouse settings
 */}}
 {{- define "hoppscotch.secret.clickhousePassword" -}}
+  {{- $namespace := include "hoppscotch.namespace" . -}}
   {{- if .Values.clickhouse.enabled -}}
     {{- $password := .Values.clickhouse.auth.password -}}
     {{- if not $password -}}
-      {{- $namespace := include "hoppscotch.namespace" . -}}
-      {{- $clickhouseSecretName := printf "%s-clickhouse" .Release.Name -}}
-      {{- $password = include "hoppscotch.secret.lookupValue" (dict "name" $clickhouseSecretName "namespace" $namespace "key" "admin-password") -}}
+      {{- $secretName := .Values.clickhouse.auth.existingSecret | default (printf "%s-clickhouse" .Release.Name) -}}
+      {{- $secretKey := .Values.clickhouse.auth.existingSecretKey | default "admin-password" -}}
+      {{- $password = include "hoppscotch.secret.lookupValue" (dict "name" $secretName "namespace" $namespace "key" $secretKey) -}}
     {{- end -}}
     {{- $password -}}
   {{- else -}}
     {{- $password := .Values.externalClickhouse.password -}}
     {{- if and (not $password) .Values.externalClickhouse.existingSecret -}}
-      {{- $namespace := include "hoppscotch.namespace" . -}}
       {{- $secretKey := .Values.externalClickhouse.existingSecretPasswordKey | default "password" -}}
       {{- $password = include "hoppscotch.secret.lookupValue" (dict "name" .Values.externalClickhouse.existingSecret "namespace" $namespace "key" $secretKey) -}}
     {{- end -}}
