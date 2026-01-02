@@ -1902,6 +1902,9 @@ redis:
     # -- Existing secret containing Redis credentials
     # @section -- Redis Parameters
     existingSecret: ""
+    # -- Key in existing secret containing password
+    # @section -- Redis Parameters
+    existingSecretPasswordKey: ""
   # -- Redis architecture (standalone or replication)
   # @section -- Redis Parameters
   architecture: standalone

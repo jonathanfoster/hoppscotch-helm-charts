@@ -483,6 +483,7 @@ unique for each release. This allows the job to be run multiple times without co
 | hoppscotch.backend.allowAuditLogs                         | bool   | `false`                                | Enable audit logs collection to ClickHouse. Enterprise Edition required.                                                              |
 | hoppscotch.backend.clickhouse.allowAuditLogs              | bool   | `false`                                | Enable audit logs collection to ClickHouse. Enterprise Edition required. Deprecated: use `hoppscotch.backend.allowAuditLogs` instead. |
 | hoppscotch.backend.horizontalScalingEnabled               | bool   | `false`                                | Enable horizontal scaling with Redis for state management. Enterprise Edition required.                                               |
+| hoppscotch.backend.databaseUrl                            | string | `""`                                   | Database connection URL. Deprecated: use `externalDatabase` instead.                                                                  |
 
 ### Hoppscotch AIO Container Parameters
 
