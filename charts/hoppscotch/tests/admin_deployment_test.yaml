@@ -1,10 +1,8 @@
 suite: Admin Deployment
 templates:
   - admin/deployment.yaml
-  - configmap.yaml
-  - secrets.yaml
-values:
-  - ../values.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 tests:
   - it: should generate deployment when deployment mode is distributed
     template: admin/deployment.yaml

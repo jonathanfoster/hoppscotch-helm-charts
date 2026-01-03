@@ -301,8 +301,13 @@ hoppscotch:
     # @section -- Hoppscotch Application Parameters
     enterpriseLicenseKey: ""
 
+    # -- Enable audit logs collection to ClickHouse. Enterprise Edition required.
+    # @section -- Hoppscotch Application Parameters
+    allowAuditLogs: false
+
     clickhouse:
-      # -- Enable audit logs collection to ClickHouse. Enterprise Edition required.
+      # @ignored -- Enable audit logs collection to ClickHouse. Enterprise Edition required. Deprecated: use
+      # `hoppscotch.backend.allowAuditLogs` instead.
       # @section -- Hoppscotch Application Parameters
       allowAuditLogs: false
 
@@ -1828,6 +1833,10 @@ postgresql:
     # -- Existing secret containing PostgreSQL credentials
     # @section -- Database Parameters
     existingSecret: ""
+    secretKeys:
+      # -- Key in existing secret containing username
+      # @section -- Database Parameters
+      userPasswordKey: ""
   # -- PostgreSQL architecture (standalone or replication)
   # @section -- Database Parameters
   architecture: standalone
@@ -1898,6 +1907,9 @@ redis:
     # -- Existing secret containing Redis credentials
     # @section -- Redis Parameters
     existingSecret: ""
+    # -- Key in existing secret containing password
+    # @section -- Redis Parameters
+    existingSecretPasswordKey: ""
   # -- Redis architecture (standalone or replication)
   # @section -- Redis Parameters
   architecture: standalone
@@ -1977,6 +1989,9 @@ clickhouse:
     # -- Existing secret containing ClickHouse credentials
     # @section -- ClickHouse Parameters
     existingSecret: ""
+    # -- Key in existing secret containing password
+    # @section -- ClickHouse Parameters
+    existingSecretKey: ""
   # -- ClickHouse resource preset
   # @section -- ClickHouse Parameters
   resourcesPreset: "nano"
