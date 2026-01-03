@@ -1,8 +1,8 @@
 suite: Resources Presets
 templates:
   - aio/deployment.yaml
-  - configmap.yaml
-  - secrets.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 tests:
   - it: should apply nano resource preset by default
     template: aio/deployment.yaml

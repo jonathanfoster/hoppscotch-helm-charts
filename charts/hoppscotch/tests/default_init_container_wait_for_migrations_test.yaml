@@ -2,10 +2,8 @@ suite: Default Init Container Wait for Migrations
 templates:
   - aio/deployment.yaml
   - backend/deployment.yaml
-  - configmap.yaml
-  - secrets.yaml
-values:
-  - ../values.yaml
+  - config/configmap.yaml
+  - config/secret.yaml
 tests:
   - it: should generate init container when enabled
     template: aio/deployment.yaml

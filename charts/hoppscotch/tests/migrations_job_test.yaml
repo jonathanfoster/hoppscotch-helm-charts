@@ -1,9 +1,7 @@
 suite: Migrations Job
 templates:
   - migrations/job.yaml
-  - secrets.yaml
-values:
-  - ../values.yaml
+  - config/secret.yaml
 tests:
   - it: should exist when migrations are enabled
     template: migrations/job.yaml

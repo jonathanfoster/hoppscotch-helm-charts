@@ -320,8 +320,8 @@ To use an existing secret:
 existingSecret: my-existing-secret
 ```
 
-Note: The existing secret must contain all required keys. See [templates/secrets.yaml](templates/secrets.yaml) for more
-info.
+Note: The existing secret must contain all required keys. See
+[templates/config/secret.yaml](templates/config/secret.yaml) for more info.
 
 ## Waiting for Database Readiness
 
@@ -480,7 +480,7 @@ unique for each release. This allows the job to be run multiple times without co
 | hoppscotch.backend.rateLimit.ttl                          | int    | `60`                                   | Time window for rate limiting (in seconds)                                                                 |
 | hoppscotch.backend.rateLimit.max                          | int    | `100`                                  | Maximum number of requests per IP within TTL window                                                        |
 | hoppscotch.backend.enterpriseLicenseKey                   | string | `""`                                   | Enterprise license key for Hoppscotch Enterprise features                                                  |
-| hoppscotch.backend.clickhouse.allowAuditLogs              | bool   | `false`                                | Enable audit logs collection to ClickHouse. Enterprise Edition required.                                   |
+| hoppscotch.backend.allowAuditLogs                         | bool   | `false`                                | Enable audit logs collection to ClickHouse. Enterprise Edition required.                                   |
 | hoppscotch.backend.horizontalScalingEnabled               | bool   | `false`                                | Enable horizontal scaling with Redis for state management. Enterprise Edition required.                    |
 
 ### Hoppscotch AIO Container Parameters
@@ -960,6 +960,7 @@ unique for each release. This allows the job to be run multiple times without co
 | postgresql.auth.password                        | string | `""`                                | PostgreSQL application password                                       |
 | postgresql.auth.database                        | string | `""`                                | PostgreSQL application database name                                  |
 | postgresql.auth.existingSecret                  | string | `""`                                | Existing secret containing PostgreSQL credentials                     |
+| postgresql.auth.secretKeys.userPasswordKey      | string | `""`                                | Key in existing secret containing username                            |
 | postgresql.architecture                         | string | `"standalone"`                      | PostgreSQL architecture (standalone or replication)                   |
 | postgresql.primary.resourcesPreset              | string | `"nano"`                            | PostgreSQL primary resource preset                                    |
 | postgresql.primary.resources                    | object | `{}`                                | PostgreSQL primary resource limits/requests                           |
@@ -984,6 +985,7 @@ unique for each release. This allows the job to be run multiple times without co
 | redis.auth.enabled                       | bool   | `true`                           | Enable Redis authentication                           |
 | redis.auth.password                      | string | `""`                             | Redis password                                        |
 | redis.auth.existingSecret                | string | `""`                             | Existing secret containing Redis credentials          |
+| redis.auth.existingSecretPasswordKey     | string | `""`                             | Key in existing secret containing password            |
 | redis.architecture                       | string | `"standalone"`                   | Redis architecture (standalone or replication)        |
 | redis.master.resourcesPreset             | string | `"nano"`                         | Redis master resource preset                          |
 | redis.master.resources                   | object | `{}`                             | Redis master resource limits/requests                 |
@@ -1008,6 +1010,7 @@ unique for each release. This allows the job to be run multiple times without co
 | clickhouse.auth.username                                            | string | `""`                                | ClickHouse username                                        |
 | clickhouse.auth.password                                            | string | `""`                                | ClickHouse password                                        |
 | clickhouse.auth.existingSecret                                      | string | `""`                                | Existing secret containing ClickHouse credentials          |
+| clickhouse.auth.existingSecretKey                                   | string | `""`                                | Key in existing secret containing password                 |
 | clickhouse.resourcesPreset                                          | string | `"nano"`                            | ClickHouse resource preset                                 |
 | clickhouse.resources                                                | object | `{}`                                | ClickHouse resource limits/requests                        |
 | clickhouse.keeper.image.repository                                  | string | `"bitnamilegacy/clickhouse-keeper"` | ClickHouse Keeper image repository                         |
@@ -1017,5 +1020,11 @@ unique for each release. This allows the job to be run multiple times without co
 | externalClickhouse.password                                         | string | `""`                                | External ClickHouse password                               |
 | externalClickhouse.existingSecret                                   | string | `""`                                | Existing secret containing external ClickHouse credentials |
 | externalClickhouse.existingSecretPasswordKey                        | string | `""`                                | Key in existing secret containing password                 |
+
+### Other Values
+
+| Key                           | Type   | Default | Description |
+| ----------------------------- | ------ | ------- | ----------- |
+| hoppscotch.backend.clickhouse | object | `{}`    |             |
 
 <!-- markdownlint-enable MD013 MD034 -->
