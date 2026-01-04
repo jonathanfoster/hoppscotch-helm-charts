@@ -242,7 +242,7 @@ test: test-unit test-e2e ## Run all tests
 .PHONY: test-e2e
 test-e2e: ## Run end-to-end tests
 	@echo "Running end-to-end tests for ${CHART_NAME} chart"
-	${TEST_E2E_DIR}/test-e2e.sh --charts=charts/${CHART_NAME} --debug
+	${TEST_E2E_DIR}/test-e2e.sh --charts=charts/${CHART_NAME}
 
 .PHONY: test-integration
 test-integration: helm-test ## Run integration tests
