@@ -14,6 +14,8 @@ frontend:
     annotations:
       nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 backend:
+  readinessProbe:
+    initialDelaySeconds: 15
   image:
     repository: hoppscotch/hoppscotch-backend-enterprise
   ingress:
@@ -42,6 +44,5 @@ postgresql:
     password: hoppscotch
     database: hoppscotch
   primary:
-    persistentVolumeClaimRetentionPolicy:
-      enabled: true
-      whenDeleted: Delete
+    persistence:
+      enabled: false
