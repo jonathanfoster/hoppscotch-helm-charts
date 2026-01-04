@@ -1,5 +1,6 @@
 .DEFAULT_GOAL:=help
 
+ARCH:=$(shell uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
 BUILD_DIR:=build
 CHART_NAME?=hoppscotch
 CHART_NAMESPACE?=default
@@ -120,22 +121,16 @@ install-deps: ## Install dependencies
 .PHONY: install-deps-linux
 install-deps-linux: ## Install dependencies for Linux
 	@echo "Installing dependencies for Linux"
-	@if ! command -v go &> /dev/null; then \
-		echo "Error: Go is not installed" 1>&2; \
-		exit 1; \
-	fi
-	@if ! command -v npm &> /dev/null; then \
-		echo "Error: NPM is not installed" 1>&2; \
-		exit 1; \
-	fi
+	@echo "Installing prerequisite packages"
+	sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl golang-go nodejs npm
 	@echo "Installing chart-releaser"
-	curl -sLo cr.tar.gz https://github.com/helm/chart-releaser/releases/download/v1.8.1/chart-releaser_1.8.1_linux_amd64.tar.gz && tar -C /usr/local/bin -xzf cr.tar.gz && rm cr.tar.gz
+	curl -sLo cr.tar.gz "https://github.com/helm/chart-releaser/releases/download/v1.8.1/chart-releaser_1.8.1_linux_${ARCH}.tar.gz" && sudo tar -C /usr/local/bin -xzf cr.tar.gz && rm cr.tar.gz
 	@echo "Installing chart-testing"
-	curl -sLo ct.tar.gz https://github.com/helm/chart-testing/releases/download/v3.13.0/chart-testing_3.13.0_linux_amd64.tar.gz && tar -C /usr/local/bin -xzf ct.tar.gz && rm ct.tar.gz
+	curl -sLo ct.tar.gz "https://github.com/helm/chart-testing/releases/download/v3.14.0/chart-testing_3.14.0_linux_${ARCH}.tar.gz" && sudo tar -C /usr/local/bin -xzf ct.tar.gz && rm ct.tar.gz
 	@echo "Installing Docker"
-	sudo apt -y install docker.io
+	sudo apt-get install -y docker.io
 	@echo "Installing Helm"
-	curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+	curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash
 	@echo "Installing helm-unittest"
 	@if ! helm plugin list | grep -q 'unittest'; then \
 		helm plugin install https://github.com/helm-unittest/helm-unittest; \
@@ -149,15 +144,15 @@ install-deps-linux: ## Install dependencies for Linux
 	@echo "Installing kubeconform"
 	go install github.com/yannh/kubeconform/cmd/kubeconform@latest
 	@echo "Installing markdownlint-cli"
-	npm install -g markdownlint-cli
+	sudo npm install -g markdownlint-cli
 	@echo "Installing prettier"
-	npm install -g prettier
+	sudo npm install -g prettier
 	@echo "Installing shellcheck"
-	sudo apt -y install shellcheck
+	sudo apt-get install -y shellcheck
 	@echo "Installing shfmt"
 	go install mvdan.cc/sh/v3/cmd/shfmt@latest
 	@echo "Installing yamllint"
-	sudo apt-get -y install yamllint
+	sudo apt-get install -y yamllint
 
 .PHONY: install-deps-macos
 install-deps-macos: ## Install dependencies for MacOS
