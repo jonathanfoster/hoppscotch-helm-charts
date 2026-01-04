@@ -395,9 +395,9 @@ aio:
   # @section -- Hoppscotch AIO Container Parameters
   extraEnvVarsSecret: ""
 
-  # -- Set container resources according to one common preset (allowed values: nano, small, medium, large, xlarge, 2xlarge)
+  # -- Set container resources according to one common preset (allowed values: nano, micro, small, medium, large, xlarge, 2xlarge)
   # @section -- Hoppscotch AIO Container Parameters
-  resourcesPreset: "nano"
+  resourcesPreset: small
   # -- Set container resources for Hoppscotch (overrides resourcesPreset)
   # @section -- Hoppscotch AIO Container Parameters
   resources: {}
@@ -756,9 +756,9 @@ frontend:
   # @section -- Hoppscotch Frontend Container Parameters
   extraEnvVarsSecret: ""
 
-  # -- Set container resources according to one common preset (allowed values: nano, small, medium, large, xlarge, 2xlarge)
+  # -- Set container resources according to one common preset (allowed values: nano, micro, small, medium, large, xlarge, 2xlarge)
   # @section -- Hoppscotch Frontend Container Parameters
-  resourcesPreset: "nano"
+  resourcesPreset: small
   # -- Set container resources for Hoppscotch (overrides resourcesPreset)
   # @section -- Hoppscotch Frontend Container Parameters
   resources: {}
@@ -1093,9 +1093,9 @@ backend:
   # @section -- Hoppscotch Backend Container Parameters
   extraEnvVarsSecret: ""
 
-  # -- Set container resources according to one common preset (allowed values: nano, small, medium, large, xlarge, 2xlarge)
+  # -- Set container resources according to one common preset (allowed values: nano, micro, small, medium, large, xlarge, 2xlarge)
   # @section -- Hoppscotch Backend Container Parameters
-  resourcesPreset: "nano"
+  resourcesPreset: small
   # -- Set container resources for Hoppscotch (overrides resourcesPreset)
   # @section -- Hoppscotch Backend Container Parameters
   resources: {}
@@ -1430,9 +1430,9 @@ admin:
   # @section -- Hoppscotch Admin Container Parameters
   extraEnvVarsSecret: ""
 
-  # -- Set container resources according to one common preset (allowed values: nano, small, medium, large, xlarge, 2xlarge)
+  # -- Set container resources according to one common preset (allowed values: nano, micro, small, medium, large, xlarge, 2xlarge)
   # @section -- Hoppscotch Admin Container Parameters
-  resourcesPreset: "nano"
+  resourcesPreset: small
   # -- Set container resources for Hoppscotch (overrides resourcesPreset)
   # @section -- Hoppscotch Admin Container Parameters
   resources: {}
@@ -1716,9 +1716,9 @@ migrations:
   # @section -- Hoppscotch Migrations Container Parameters
   extraEnvVarsSecret: ""
 
-  # -- Set container resources according to one common preset (allowed values: nano, small, medium, large, xlarge, 2xlarge)
+  # -- Set container resources according to one common preset (allowed values: nano, micro, small, medium, large, xlarge, 2xlarge)
   # @section -- Hoppscotch Migrations Container Parameters
-  resourcesPreset: "nano"
+  resourcesPreset: small
   # -- Set container resources for Hoppscotch (overrides resourcesPreset)
   # @section -- Hoppscotch Migrations Container Parameters
   resources: {}
@@ -1843,7 +1843,7 @@ postgresql:
   primary:
     # -- PostgreSQL primary resource preset
     # @section -- Database Parameters
-    resourcesPreset: "nano"
+    resourcesPreset: small
     # -- PostgreSQL primary resource limits/requests
     # @section -- Database Parameters
     resources: {}
@@ -1916,7 +1916,7 @@ redis:
   master:
     # -- Redis master resource preset
     # @section -- Redis Parameters
-    resourcesPreset: "nano"
+    resourcesPreset: small
     # -- Redis master resource limits/requests
     # @section -- Redis Parameters
     resources: {}
@@ -1994,7 +1994,7 @@ clickhouse:
     existingSecretKey: ""
   # -- ClickHouse resource preset
   # @section -- ClickHouse Parameters
-  resourcesPreset: "nano"
+  resourcesPreset: small
   # -- ClickHouse resource limits/requests
   # @section -- ClickHouse Parameters
   resources: {}
