@@ -43,7 +43,7 @@ spec:
           - -c
           - |
             echo "Running database migrations..."
-            pnpx prisma migrate deploy
+            pnpm exec prisma migrate deploy
         env:
           - name: DATABASE_URL
             {{- if .Values.enterprise.config.database.external }}
