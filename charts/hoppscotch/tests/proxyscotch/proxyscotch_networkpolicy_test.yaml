@@ -1,0 +1,24 @@
+suite: Proxyscotch Network Policy
+templates:
+  - proxyscotch/networkpolicy.yaml
+tests:
+  - it: should generate network policy when network policy is enabled given proxyscotch is enabled
+    set:
+      proxyscotch:
+        enabled: true
+        networkPolicy:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+
+  - it: should not generate network policy when proxyscotch is disabled
+    set:
+      proxyscotch:
+        enabled: false
+      networkPolicy:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

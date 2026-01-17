@@ -1,0 +1,30 @@
+suite: Proxyscotch Service Monitor
+templates:
+  - proxyscotch/servicemonitor.yaml
+tests:
+  - it: >-
+      should generate service monitor when service monitor is enabled given proxyscotch is enabled and metrics are
+      enabled
+    set:
+      proxyscotch:
+        enabled: true
+        metrics:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: monitoring.coreos.com/v1
+          kind: ServiceMonitor
+
+  - it: should not generate service monitor when proxyscotch is disabled
+    set:
+      proxyscotch:
+        enabled: false
+        metrics:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

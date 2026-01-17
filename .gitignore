@@ -5,4 +5,4 @@
 .vscode/
 build/
 charts/*/charts/
-charts/*/tests/__snapshot__/
+__snapshot__/

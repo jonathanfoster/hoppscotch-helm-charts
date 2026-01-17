@@ -1,0 +1,23 @@
+suite: Proxyscotch Deployment
+templates:
+  - proxyscotch/deployment.yaml
+  - proxyscotch/configmap.yaml
+tests:
+  - it: should generate a deployment when proxyscotch is enabled
+    template: proxyscotch/deployment.yaml
+    set:
+      proxyscotch:
+        enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: apps/v1
+          kind: Deployment
+
+  - it: should not generate a deployment when proxyscotch is disabled
+    template: proxyscotch/deployment.yaml
+    set:
+      proxyscotch:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0

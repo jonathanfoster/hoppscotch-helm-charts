@@ -55,6 +55,9 @@ lightweight, web-based API development suite. Follow the guidelines below when w
   `equal` for static values or `matchRegex` for dynamic values.
 - Use helm unittest [Kubernetes provider](https://github.com/helm-unittest/helm-unittest/blob/main/DOCUMENT.md) to unit
   test existing resource lookup logic
+- Use reverse [Gerkin](https://cucumber.io/docs/gherkin/reference) syntax for unit test names. Instead of the
+  traditional given, when, then, use then, when, given. This fits better with the helm unittest syntax. For example,
+  `it: should generate an ingress when ingress is enabled given proxyscotch is enabled`
 
 ### Integration testing
 

@@ -1,0 +1,28 @@
+suite: Proxyscotch PVC
+templates:
+  - proxyscotch/pvc.yaml
+tests:
+  - it: >-
+      should generate persistent volume claim when persistence is enabled given proxyscotch is enabled and existing
+      claim is not set
+    set:
+      proxyscotch:
+        enabled: true
+        persistence:
+          enabled: true
+          existingClaim: ""
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+
+  - it: should not generate persistent volume claim when proxyscotch is disabled
+    set:
+      proxyscotch:
+        enabled: false
+        persistence:
+          enabled: true
+          existingClaim: ""
+    asserts:
+      - hasDocuments:
+          count: 0

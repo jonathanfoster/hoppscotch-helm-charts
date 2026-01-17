@@ -1,0 +1,64 @@
+suite: Proxyscotch ConfigMap
+templates:
+  - proxyscotch/configmap.yaml
+tests:
+  - it: should generate a configmap when proxyscotch is enabled
+    set:
+      proxyscotch:
+        enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: ConfigMap
+
+  - it: should not generate a configmap when proxyscotch is disabled
+    set:
+      proxyscotch:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+#  - it: should set name to proxyscotch name
+#    set: {}
+#    asserts: []
+#
+#  - it: should set namespace to hoppscotch namespace
+#    set: {}
+#    asserts: []
+#
+#  - it: should set component label to proxyscotch component
+#    set: {}
+#    asserts: []
+#
+#  - it: should set add hoppscotch labels
+#    set: {}
+#    asserts: []
+#
+#  - it: should set add common annotations
+#    set: {}
+#    asserts: []
+#
+#  - it: should set proxyscotch allowed origins when specified
+#    set: {}
+#    asserts: []
+#
+#  - it: should set proxyscotch allowed origins to "*" when not specified
+#    set: {}
+#    asserts: []
+#
+#  - it: should set proxyscotch banned outputs when specified
+#    set: {}
+#    asserts: []
+#
+#  - it: should set proxyscotch banned outputs to "" when not specified
+#    set: {}
+#    asserts: []
+#
+#  - it: should set proxyscotch banned destinations when specified
+#    set: {}
+#    asserts: []
+#
+#  - it: should set proxyscotch banned destinations to "" when not specified
+#    set: {}
+#    asserts: []

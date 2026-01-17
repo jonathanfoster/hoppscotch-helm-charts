@@ -1,0 +1,24 @@
+suite: Proxyscotch Ingress
+templates:
+  - proxyscotch/ingress.yaml
+tests:
+  - it: should generate ingress when ingress is enabled given proxyscotch is enabled
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+
+  - it: should not generate ingress when proxyscotch is disabled
+    set:
+      proxyscotch:
+        enabled: false
+        ingress:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

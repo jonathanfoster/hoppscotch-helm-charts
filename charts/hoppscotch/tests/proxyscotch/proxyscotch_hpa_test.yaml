@@ -1,0 +1,24 @@
+suite: Proxyscotch HPA
+templates:
+  - proxyscotch/hpa.yaml
+tests:
+  - it: should generate horizontal pod autoscaler when autoscaling is enabled given proxyscotch is enabled
+    set:
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: autoscaling/v2
+          kind: HorizontalPodAutoscaler
+
+  - it: should not generate horizontal pod autoscaler when proxyscotch is disabled
+    set:
+      proxyscotch:
+        enabled: false
+        autoscaling:
+          enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

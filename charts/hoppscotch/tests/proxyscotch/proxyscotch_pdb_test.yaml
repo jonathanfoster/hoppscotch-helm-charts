@@ -1,0 +1,24 @@
+suite: Proxyscotch PDB
+templates:
+  - proxyscotch/pdb.yaml
+tests:
+  - it: should generate pod disruption budget when pod disruption budget is enabled given proxyscotch is enabled
+    set:
+      proxyscotch:
+        enabled: true
+        pdb:
+          create: true
+    asserts:
+      - containsDocument:
+          apiVersion: policy/v1
+          kind: PodDisruptionBudget
+
+  - it: should not generate pod disruption budget when proxyscotch is disabled
+    set:
+      proxyscotch:
+        enabled: false
+        pdb:
+          create: true
+    asserts:
+      - hasDocuments:
+          count: 0

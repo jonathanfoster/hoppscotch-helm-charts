@@ -1,0 +1,20 @@
+suite: Proxyscotch Service
+templates:
+  - proxyscotch/service.yaml
+tests:
+  - it: should generate service when proxyscotch is enabled
+    set:
+      proxyscotch:
+        enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: Service
+
+  - it: should not generate service when proxyscotch is disabled
+    set:
+      proxyscotch:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
