@@ -1,0 +1,38 @@
+{{- if and .Values.proxyscotch.enabled .Values.proxyscotch.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "hoppscotch.proxyscotch.name" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "hoppscotch.proxyscotch.component" . }}
+  minReplicas: {{ .Values.proxyscotch.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.proxyscotch.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.proxyscotch.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.proxyscotch.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.proxyscotch.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.proxyscotch.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

@@ -1,0 +1,25 @@
+{{- if and .Values.proxyscotch.enabled .Values.proxyscotch.pdb.create }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "hoppscotch.proxyscotch.name" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.proxyscotch.pdb.minAvailable }}
+  minAvailable: {{ .Values.proxyscotch.pdb.minAvailable }}
+  {{- end  }}
+  {{- if or .Values.proxyscotch.pdb.maxUnavailable ( not .Values.proxyscotch.pdb.minAvailable ) }}
+  maxUnavailable: {{ .Values.proxyscotch.pdb.maxUnavailable | default 1 }}
+  {{- end  }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+{{- end }}

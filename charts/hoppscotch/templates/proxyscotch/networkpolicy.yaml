@@ -1,0 +1,68 @@
+{{- if and .Values.proxyscotch.enabled .Values.proxyscotch.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "hoppscotch.proxyscotch.name" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  policyTypes:
+    - Ingress
+    - Egress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+  egress:
+    {{- if .Values.proxyscotch.networkPolicy.allowExternalEgress }}
+    - {}
+    {{- else }}
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    {{- if .Values.proxyscotch.networkPolicy.extraEgress }}
+    {{- toYaml .Values.proxyscotch.networkPolicy.extraEgress | nindent 4 }}
+    {{- end }}
+    {{- end }}
+  ingress:
+    - ports:
+        - port: {{ .Values.proxyscotch.containerPorts.http }}
+        - port: {{ .Values.proxyscotch.containerPorts.https }}
+      {{- if not .Values.proxyscotch.networkPolicy.allowExternal }}
+      from:
+        - podSelector:
+            matchLabels:
+              {{- include "hoppscotch.selectorLabels" . | nindent 14 }}
+        {{- if .Values.proxyscotch.networkPolicy.addExternalClientAccess }}
+        - podSelector:
+            matchLabels:
+              {{ include "hoppscotch.fullname" . }}-client: "true"
+        {{- end }}
+        {{- if .Values.proxyscotch.networkPolicy.ingressPodMatchLabels }}
+        - podSelector:
+            matchLabels:
+              {{- .Values.proxyscotch.networkPolicy.ingressPodMatchLabels | nindent 14 }}
+        {{- end }}
+        {{- if .Values.proxyscotch.networkPolicy.ingressNSMatchLabels }}
+        - namespaceSelector:
+            matchLabels:
+              {{- .Values.proxyscotch.networkPolicy.ingressNSMatchLabels | nindent 14 }}
+          {{- if .Values.proxyscotch.networkPolicy.ingressNSPodMatchLabels }}
+          podSelector:
+            matchLabels:
+              {{- .Values.proxyscotch.networkPolicy.ingressNSPodMatchLabels | nindent 14 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- if .Values.proxyscotch.networkPolicy.extraIngress }}
+    {{- toYaml .Values.proxyscotch.networkPolicy.extraIngress | nindent 4 }}
+    {{- end }}
+{{- end }}

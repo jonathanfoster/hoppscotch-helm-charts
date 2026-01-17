@@ -1,0 +1,44 @@
+{{- if and .Values.proxyscotch.enabled .Values.proxyscotch.persistence.enabled (not .Values.proxyscotch.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "hoppscotch.proxyscotch.name" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.proxyscotch.persistence.annotations }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.proxyscotch.persistence.annotations }}
+    {{- toYaml .Values.proxyscotch.persistence.annotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.proxyscotch.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.proxyscotch.persistence.size | quote }}
+  {{- if .Values.proxyscotch.persistence.storageClass }}
+  {{- if (eq "-" .Values.proxyscotch.persistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ .Values.proxyscotch.persistence.storageClass | quote }}
+  {{- end }}
+  {{- else if .Values.global.defaultStorageClass }}
+  storageClassName: {{ .Values.global.defaultStorageClass | quote }}
+  {{- end }}
+  {{- if .Values.proxyscotch.persistence.selector }}
+  selector:
+    {{- toYaml .Values.proxyscotch.persistence.selector | nindent 4 }}
+  {{- end }}
+  {{- if .Values.proxyscotch.persistence.dataSource }}
+  dataSource:
+    {{- toYaml .Values.proxyscotch.persistence.dataSource | nindent 4 }}
+  {{- end }}
+{{- end }}

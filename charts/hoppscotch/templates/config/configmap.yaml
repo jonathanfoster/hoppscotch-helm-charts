@@ -50,6 +50,7 @@ data:
   OIDC_SCOPE: {{ .Values.hoppscotch.backend.auth.oidc.scope | join " " | quote }}
   OIDC_TOKEN_URL: {{ .Values.hoppscotch.backend.auth.oidc.tokenUrl | quote }}
   OIDC_USER_INFO_URL: {{ .Values.hoppscotch.backend.auth.oidc.userInfoUrl | quote }}
+  # TODO: Set proxy app URL to Proxyscotch URL if enabled
   PROXY_APP_URL: {{ .Values.hoppscotch.frontend.proxyAppUrl | quote }}
   RATE_LIMIT_TTL: {{ .Values.hoppscotch.backend.rateLimit.ttl | quote }}
   RATE_LIMIT_MAX: {{ .Values.hoppscotch.backend.rateLimit.max | quote }}

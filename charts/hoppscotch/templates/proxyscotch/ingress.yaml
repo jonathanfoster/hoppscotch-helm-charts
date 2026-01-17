@@ -1,0 +1,65 @@
+{{- if and .Values.proxyscotch.enabled .Values.proxyscotch.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "hoppscotch.proxyscotch.name" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.proxyscotch.ingress.annotations }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.proxyscotch.ingress.annotations }}
+    {{- toYaml .Values.proxyscotch.ingress.annotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  {{- if .Values.proxyscotch.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.proxyscotch.ingress.ingressClassName | quote }}
+  {{- end }}
+  rules:
+    {{- if .Values.proxyscotch.ingress.hostname }}
+    - host: {{ .Values.proxyscotch.ingress.hostname }}
+      http:
+        paths:
+          {{- if .Values.proxyscotch.ingress.extraPaths }}
+          {{- toYaml .Values.proxyscotch.ingress.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.proxyscotch.ingress.path }}
+            pathType: {{ .Values.proxyscotch.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "hoppscotch.proxyscotch.name" . }}
+                port:
+                  number: {{ .Values.proxyscotch.service.ports.http }}
+    {{- end }}
+    {{- range .Values.proxyscotch.ingress.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            backend:
+              service:
+                name: {{ include "hoppscotch.proxyscotch.name" . }}
+                port:
+                  number: {{ $.Values.proxyscotch.service.ports.http }}
+    {{- end }}
+    {{- if .Values.proxyscotch.ingress.extraRules }}
+    {{- toYaml .Values.proxyscotch.ingress.extraRules | nindent 4 }}
+    {{- end }}
+  {{- if or (and .Values.proxyscotch.ingress.tls (or (include "hoppscotch.hasCertManagerRequest" ( dict "annotations" .Values.proxyscotch.ingress.annotations )) .Values.proxyscotch.ingress.selfSigned)) .Values.proxyscotch.ingress.extraTls }}
+  tls:
+    {{- if and .Values.proxyscotch.ingress.tls (or (include "hoppscotch.hasCertManagerRequest" ( dict "annotations" .Values.proxyscotch.ingress.annotations )) .Values.proxyscotch.ingress.selfSigned) }}
+    - hosts:
+        - {{ .Values.proxyscotch.ingress.hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.proxyscotch.ingress.hostname }}
+    {{- end }}
+    {{- if .Values.proxyscotch.ingress.extraTls }}
+    {{- .Values.proxyscotch.ingress.extraTls | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,153 @@
+{{- if .Values.proxyscotch.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hoppscotch.proxyscotch.name" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.proxyscotch.autoscaling.enabled }}
+  replicas: {{ .Values.backend.replicaCount }}
+  {{- end }}
+  {{- if .Values.proxyscotch.updateStrategy }}
+  strategy:
+    {{- toYaml .Values.proxyscotch.updateStrategy | nindent 4 }}
+  {{- else }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+      {{- include "hoppscotch.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/configmap-{{ include "hoppscotch.proxyscotch.name" . }}: {{ include (print $.Template.BasePath "/proxyscotch/configmap.yaml") . | sha256sum }}
+        {{- with .Values.proxyscotch.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+        {{- include "hoppscotch.labels" . | nindent 8 }}
+        {{- with .Values.proxyscotch.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hoppscotch.serviceAccountName" . }}
+      {{- with .Values.proxyscotch.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: proxyscotch
+          {{- with .Values.proxyscotch.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "hoppscotch.image" (dict "component" .Values.proxyscotch "context" .) }}
+          imagePullPolicy: {{ .Values.proxyscotch.image.pullPolicy }}
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - until ./node_modules/.bin/prisma migrate status; do sleep 2; done
+          ports:
+            - name: http
+              containerPort: {{ .Values.proxyscotch.containerPorts.http }}
+              protocol: TCP
+          {{- if .Values.proxyscotch.customLivenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.proxyscotch.customLivenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.proxyscotch.customReadinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.proxyscotch.customReadinessProbe | nindent 12 }}
+          {{- else if .Values.backend.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.proxyscotch.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.backend.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.backend.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.backend.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.proxyscotch.customStartupProbe }}
+          startupProbe:
+            {{- toYaml .Values.proxyscotch.customStartupProbe | nindent 12 }}
+          {{- end }}
+          {{- $resources := include "hoppscotch.resources" (dict "preset" .Values.proxyscotch.resourcesPreset "resources" .Values.proxyscotch.resources) }}
+          {{- if $resources }}
+          resources:
+            {{- $resources | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.proxyscotch.volumeMounts .Values.proxyscotch.persistence.enabled }}
+          volumeMounts:
+            {{- if .Values.proxyscotch.persistence.enabled }}
+            - name: data
+              mountPath: {{ .Values.proxyscotch.persistence.mountPath }}
+              {{- if .Values.proxyscotch.persistence.subPath }}
+              subPath: {{ .Values.proxyscotch.persistence.subPath }}
+              {{- end }}
+            {{- end }}
+            {{- with .Values.proxyscotch.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.proxyscotch.extraEnvVars }}
+          env:
+            {{- toYaml .Values.proxyscotch.extraEnvVars | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "hoppscotch.proxyscotch.name" . }}
+            {{- if .Values.proxyscotch.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ .Values.proxyscotch.extraEnvVarsCM }}
+            {{- end }}
+            {{- if .Values.proxyscotch.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ .Values.proxyscotch.extraEnvVarsSecret }}
+            {{- end }}
+      {{- if or .Values.proxyscotch.volumes .Values.proxyscotch.persistence.enabled }}
+      volumes:
+        {{- if .Values.proxyscotch.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            {{- if .Values.proxyscotch.persistence.existingClaim }}
+            claimName: {{ .Values.proxyscotch.persistence.existingClaim }}
+            {{- else }}
+            claimName: {{ include "hoppscotch.proxyscotch.name" . }}
+            {{- end }}
+        {{- end }}
+        {{- with .Values.proxyscotch.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.proxyscotch.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.proxyscotch.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.proxyscotch.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.proxyscotch.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,55 @@
+{{- if .Values.proxyscotch.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hoppscotch.proxyscotch.name" . }}
+  namespace: {{ include "hoppscotch.namespace" . | quote }}
+  labels:
+    app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+    {{- include "hoppscotch.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.proxyscotch.service.annotations }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.proxyscotch.service.annotations }}
+    {{- toYaml .Values.proxyscotch.service.annotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  type: {{ .Values.proxyscotch.service.type }}
+  {{- if and .Values.proxyscotch.service.clusterIP (eq .Values.proxyscotch.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.proxyscotch.service.clusterIP }}
+  {{- end }}
+  {{- if .Values.proxyscotch.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.proxyscotch.service.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.proxyscotch.service.sessionAffinityConfig }}
+  sessionAffinityConfig: {{ .Values.proxyscotch.service.sessionAffinityConfig }}
+  {{- end }}
+  {{- if or (eq .Values.proxyscotch.service.type "LoadBalancer") (eq .Values.proxyscotch.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.proxyscotch.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if and (eq .Values.proxyscotch.service.type "LoadBalancer") (not (empty .Values.proxyscotch.service.loadBalancerSourceRanges)) }}
+  loadBalancerSourceRanges: {{ .Values.proxyscotch.service.loadBalancerSourceRanges }}
+  {{- end }}
+  {{- if and (eq .Values.proxyscotch.service.type "LoadBalancer") (not (empty .Values.proxyscotch.service.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.proxyscotch.service.loadBalancerIP }}
+  {{- end }}
+  ports:
+    - name: http
+      port: {{ .Values.proxyscotch.service.ports.http }}
+      {{- if not (eq .Values.proxyscotch.service.ports.http .Values.proxyscotch.containerPorts.http) }}
+      targetPort: {{ .Values.proxyscotch.containerPorts.http }}
+      {{- end }}
+      protocol: TCP
+      {{- if and (or (eq .Values.proxyscotch.service.type "NodePort") (eq .Values.proxyscotch.service.type "LoadBalancer")) (not (empty .Values.proxyscotch.service.nodePorts.http)) }}
+      nodePort: {{ .Values.proxyscotch.service.nodePorts.http }}
+      {{- end }}
+    {{- if .Values.proxyscotch.service.extraPorts }}
+    {{- toYaml .Values.proxyscotch.service.extraPorts | nindent 4 }}
+    {{- end }}
+  selector:
+    app.kubernetes.io/component: {{ include "hoppscotch.proxyscotch.component" . }}
+    {{- include "hoppscotch.selectorLabels" . | nindent 4 }}
+{{- end }}
