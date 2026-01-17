@@ -57,3 +57,10 @@ Frontend web app server service base URL based on deployment and access mode
     {{- printf "http://%s.%s.svc.%s:%d" (include "hoppscotch.frontend.serviceName" .) (include "hoppscotch.namespace" .) .Values.clusterDomain (.Values.frontend.service.ports.http | int) -}}
   {{- end -}}
 {{- end -}}
+
+{{/*
+Proxyscotch service base URL based on deployment and access mode
+*/}}
+{{- define "hoppscotch.tests.proxyscotchServiceBaseUrl" -}}
+  {{- printf "http://%s.%s.svc.%s:%d" (include "hoppscotch.proxyscotch.name" .) (include "hoppscotch.namespace" .) .Values.clusterDomain (.Values.proxyscotch.service.ports.http | int) -}}
+{{- end -}}

@@ -1,0 +1,31 @@
+deploymentMode: aio
+aio:
+  readinessProbe:
+    initialDelaySeconds: 15
+  ingress:
+    enabled: true
+    hostname: hoppscotch.local
+    tls: true
+    selfSigned: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+proxyscotch:
+  enabled: true
+  ingress:
+    enabled: true
+    hostname: proxyscotch.local
+    tls: true
+    selfSigned: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+postgresql:
+  enabled: true
+  auth:
+    username: hoppscotch
+    password: hoppscotch
+    database: hoppscotch
+  primary:
+    persistence:
+      enabled: false
