@@ -315,6 +315,24 @@ hoppscotch:
     # @section -- Hoppscotch Application Parameters
     horizontalScalingEnabled: false
 
+  proxyscotch:
+    # -- Access token used to restrict access to the server
+    # @section -- Hoppscotch Application Parameters
+    token: ""
+
+    # -- List of allowed origins
+    # @section -- Hoppscotch Application Parameters
+    allowedOrigins:
+      - "*"
+
+    # -- List of banned outputs
+    # @section -- Hoppscotch Application Parameters
+    bannedOutputs: []
+
+    # -- List of banned proxy destinations
+    # @section -- Hoppscotch Application Parameters
+    bannedDestinations: []
+
 # @section -- Hoppscotch AIO Container Parameters
 
 aio:
@@ -1772,6 +1790,347 @@ defaultInitContainers:
     # -- Enable init container that waits for migrations to complete
     # @section -- Default Init Containers Parameters
     enabled: true
+
+# @section -- Proxyscotch Container Parameters
+
+proxyscotch:
+  # -- Enable Proxyscotch container
+  # @section -- Proxyscotch Container Parameters
+  enabled: false
+
+  image:
+    # -- Proxyscotch image repository
+    # @section -- Proxyscotch Container Parameters
+    repository: hoppscotch/proxyscotch
+    # -- Proxyscotch image pull policy
+    # @section -- Proxyscotch Container Parameters
+    pullPolicy: IfNotPresent
+    # -- Proxyscotch image tag
+    # @section -- Proxyscotch Container Parameters
+    tag: v0.1.4
+
+  # -- Number of Proxyscotch replicas
+  # @section -- Proxyscotch Container Parameters
+  replicaCount: 1
+
+  containerPorts:
+    # -- Proxyscotch HTTP container port
+    # @section -- Proxyscotch Container Parameters
+    http: 80
+    # -- Proxyscotch HTTPS container port
+    # @section -- Proxyscotch Container Parameters
+    https: 443
+
+  readinessProbe:
+    # -- Enable readiness probe
+    # @section -- Proxyscotch Container Parameters
+    enabled: true
+    # -- Initial delay seconds for readiness probe
+    # @section -- Proxyscotch Container Parameters
+    initialDelaySeconds: 0
+    # -- Period seconds for readiness probe
+    # @section -- Proxyscotch Container Parameters
+    periodSeconds: 10
+    # -- Timeout seconds for readiness probe
+    # @section -- Proxyscotch Container Parameters
+    timeoutSeconds: 1
+    # -- Failure threshold for readiness probe
+    # @section -- Proxyscotch Container Parameters
+    failureThreshold: 3
+    # -- Success threshold for readiness probe
+    # @section -- Proxyscotch Container Parameters
+    successThreshold: 1
+
+  # -- Custom liveness probe that overrides the default one
+  # @section -- Proxyscotch Container Parameters
+  customLivenessProbe: {}
+
+  # -- Custom readiness probe that overrides the default one
+  # @section -- Proxyscotch Container Parameters
+  customReadinessProbe: {}
+
+  # -- Custom startup probe that overrides the default one
+  # @section -- Proxyscotch Container Parameters
+  customStartupProbe: {}
+
+  # -- Array of extra environment variables to be added to Proxyscotch containers
+  # @section -- Proxyscotch Container Parameters
+  extraEnvVars: []
+  # -- Name of existing ConfigMap containing extra environment variables
+  # @section -- Proxyscotch Container Parameters
+  extraEnvVarsCM: ""
+  # -- Name of existing Secret containing extra environment variables
+  # @section -- Proxyscotch Container Parameters
+  extraEnvVarsSecret: ""
+
+  # -- Set container resources according to one common preset (allowed values: nano, small, medium, large, xlarge, 2xlarge)
+  # @section -- Proxyscotch Container Parameters
+  resourcesPreset: small
+  # -- Set container resources for Proxyscotch (overrides resourcesPreset)
+  # @section -- Proxyscotch Container Parameters
+  resources: {}
+
+  # -- Annotations to add to Proxyscotch pods
+  # @section -- Proxyscotch Container Parameters
+  podAnnotations: {}
+  # -- Labels to add to Proxyscotch pods
+  # @section -- Proxyscotch Container Parameters
+  podLabels: {}
+
+  # -- Security context for Proxyscotch pods
+  # @section -- Proxyscotch Container Parameters
+  podSecurityContext: {}
+  # -- Security context for Proxyscotch containers
+  # @section -- Proxyscotch Container Parameters
+  securityContext: {}
+
+  updateStrategy:
+    # -- Deployment update strategy type (RollingUpdate or Recreate)
+    # @section -- Proxyscotch Container Parameters
+    type: RollingUpdate
+
+  pdb:
+    # -- Create PodDisruptionBudget for Proxyscotch deployment
+    # @section -- Proxyscotch Container Parameters
+    create: false
+    # -- Minimum number of available pods during disruptions
+    # @section -- Proxyscotch Container Parameters
+    minAvailable: ""
+    # -- Maximum number of unavailable pods during disruptions
+    # @section -- Proxyscotch Container Parameters
+    maxUnavailable: ""
+
+  autoscaling:
+    # -- Enable autoscaling for Proxyscotch deployment
+    # @section -- Proxyscotch Container Parameters
+    enabled: false
+    # -- Minimum number of Proxyscotch replicas
+    # @section -- Proxyscotch Container Parameters
+    minReplicas: 1
+    # -- Maximum number of Proxyscotch replicas
+    # @section -- Proxyscotch Container Parameters
+    maxReplicas: 100
+    # -- Target CPU utilization percentage for autoscaling
+    # @section -- Proxyscotch Container Parameters
+    targetCPUUtilizationPercentage: 80
+    # -- Target memory utilization percentage for autoscaling
+    # @section -- Proxyscotch Container Parameters
+    targetMemoryUtilizationPercentage: 80
+
+  # -- Node labels for Proxyscotch pods assignment
+  # @section -- Proxyscotch Container Parameters
+  nodeSelector: {}
+
+  # -- Tolerations for Proxyscotch pods assignment
+  # @section -- Proxyscotch Container Parameters
+  tolerations: []
+
+  # -- Affinity for Proxyscotch pods assignment
+  # @section -- Proxyscotch Container Parameters
+  affinity: {}
+
+  # -- Topology spread constraints for Proxyscotch pods assignment
+  # @section -- Proxyscotch Container Parameters
+  topologySpreadConstraints: []
+
+  # -- Extra volumes to add to Proxyscotch deployment
+  # @section -- Proxyscotch Container Parameters
+  volumes: []
+
+  # -- Extra volume mounts to add to Proxyscotch containers
+  # @section -- Proxyscotch Container Parameters
+  volumeMounts: []
+
+  service:
+    # -- Kubernetes service type
+    # @section -- Proxyscotch Container Parameters
+    type: ClusterIP
+    ports:
+      # -- Service HTTP port
+      # @section -- Proxyscotch Container Parameters
+      http: 80
+      # -- Service HTTPS port
+      # @section -- Proxyscotch Container Parameters
+      https: 443
+    # -- Static cluster IP address (optional)
+    # @section -- Proxyscotch Container Parameters
+    clusterIP: ""
+    nodePorts:
+      # -- NodePort for HTTP (when service type is NodePort)
+      # @section -- Proxyscotch Container Parameters
+      http: ""
+      # -- NodePort for HTTPS (when service type is NodePort)
+      # @section -- Proxyscotch Container Parameters
+      https: ""
+    # -- Load balancer IP address (when service type is LoadBalancer)
+    # @section -- Proxyscotch Container Parameters
+    loadBalancerIP: ""
+    # -- Load balancer source IP ranges (when service type is LoadBalancer)
+    # @section -- Proxyscotch Container Parameters
+    loadBalancerSourceRanges: []
+    # -- External traffic policy (Cluster or Local)
+    # @section -- Proxyscotch Container Parameters
+    externalTrafficPolicy: Cluster
+    # -- Service annotations
+    # @section -- Proxyscotch Container Parameters
+    annotations: {}
+    # -- Session affinity (None or ClientIP)
+    # @section -- Proxyscotch Container Parameters
+    sessionAffinity: None
+    # -- Session affinity configuration
+    # @section -- Proxyscotch Container Parameters
+    sessionAffinityConfig: {}
+    # -- Extra service ports
+    # @section -- Proxyscotch Container Parameters
+    extraPorts: []
+
+  networkPolicy:
+    # -- Enable NetworkPolicy for Proxyscotch pods
+    # @section -- Proxyscotch Container Parameters
+    enabled: false
+    # -- Allow external traffic to Proxyscotch pods
+    # @section -- Proxyscotch Container Parameters
+    allowExternal: true
+    # -- Allow external egress traffic from Proxyscotch pods
+    # @section -- Proxyscotch Container Parameters
+    allowExternalEgress: true
+    # -- Add external client access to NetworkPolicy
+    # @section -- Proxyscotch Container Parameters
+    addExternalClientAccess: true
+    # -- Extra ingress rules for NetworkPolicy
+    # @section -- Proxyscotch Container Parameters
+    extraIngress: []
+    # -- Extra egress rules for NetworkPolicy
+    # @section -- Proxyscotch Container Parameters
+    extraEgress: []
+    # -- Pod selector labels for ingress rules
+    # @section -- Proxyscotch Container Parameters
+    ingressPodMatchLabels: {}
+    # -- Namespace selector labels for ingress rules
+    # @section -- Proxyscotch Container Parameters
+    ingressNSMatchLabels: {}
+    # -- Namespace pod selector labels for ingress rules
+    # @section -- Proxyscotch Container Parameters
+    ingressNSPodMatchLabels: {}
+
+  ingress:
+    # -- Enable ingress for Proxyscotch
+    # @section -- Proxyscotch Container Parameters
+    enabled: false
+    # -- Ingress class name
+    # @section -- Proxyscotch Container Parameters
+    ingressClassName: ""
+    # -- Ingress hostname
+    # @section -- Proxyscotch Container Parameters
+    hostname: proxyscotch.local
+    # -- Ingress path
+    # @section -- Proxyscotch Container Parameters
+    path: /
+    # -- Ingress path type
+    # @section -- Proxyscotch Container Parameters
+    pathType: ImplementationSpecific
+    # -- Ingress API version
+    # @section -- Proxyscotch Container Parameters
+    apiVersion: ""
+    # -- Ingress annotations
+    # @section -- Proxyscotch Container Parameters
+    annotations: {}
+    # -- Enable TLS for ingress
+    # @section -- Proxyscotch Container Parameters
+    tls: false
+    # -- Create self-signed TLS certificates
+    # @section -- Proxyscotch Container Parameters
+    selfSigned: false
+    # -- Extra hostnames for ingress
+    # @section -- Proxyscotch Container Parameters
+    extraHosts: []
+    # -- Extra paths for ingress
+    # @section -- Proxyscotch Container Parameters
+    extraPaths: []
+    # -- Extra TLS configurations for ingress
+    # @section -- Proxyscotch Container Parameters
+    extraTls: []
+    # -- TLS secrets for ingress
+    # @section -- Proxyscotch Container Parameters
+    secrets: []
+    # -- Extra ingress rules
+    # @section -- Proxyscotch Container Parameters
+    extraRules: []
+
+  persistence:
+    # -- Enable persistent storage for Proxyscotch
+    # @section -- Proxyscotch Container Parameters
+    enabled: false
+    # -- Storage class for persistent volume
+    # @section -- Proxyscotch Container Parameters
+    storageClass: ""
+    # -- Access modes for persistent volume
+    # @section -- Proxyscotch Container Parameters
+    accessModes:
+      - ReadWriteOnce
+    # -- Size of persistent volume
+    # @section -- Proxyscotch Container Parameters
+    size: 8Gi
+    # -- Mount path for persistent volume
+    # @section -- Proxyscotch Container Parameters
+    mountPath: /proxyscotch/data
+    # -- Subpath within persistent volume
+    # @section -- Proxyscotch Container Parameters
+    subPath: ""
+    # -- Annotations for persistent volume claim
+    # @section -- Proxyscotch Container Parameters
+    annotations: {}
+    # -- Data source for persistent volume
+    # @section -- Proxyscotch Container Parameters
+    dataSource: {}
+    # -- Use existing persistent volume claim
+    # @section -- Proxyscotch Container Parameters
+    existingClaim: ""
+    # -- Selector for persistent volume
+    # @section -- Proxyscotch Container Parameters
+    selector: {}
+
+  metrics:
+    # -- Enable metrics collection for Proxyscotch
+    # @section -- Proxyscotch Container Parameters
+    enabled: false
+    serviceMonitor:
+      # -- Enable ServiceMonitor for Prometheus monitoring
+      # @section -- Proxyscotch Container Parameters
+      enabled: false
+      # -- Namespace for ServiceMonitor (defaults to release namespace)
+      # @section -- Proxyscotch Container Parameters
+      namespace: ""
+      # -- ServiceMonitor annotations
+      # @section -- Proxyscotch Container Parameters
+      annotations: {}
+      # -- ServiceMonitor labels
+      # @section -- Proxyscotch Container Parameters
+      labels: {}
+      # -- ServiceMonitor job label
+      # @section -- Proxyscotch Container Parameters
+      jobLabel: ""
+      # -- Honor labels from target
+      # @section -- Proxyscotch Container Parameters
+      honorLabels: false
+      # -- ServiceMonitor scrape interval
+      # @section -- Proxyscotch Container Parameters
+      interval: ""
+      # -- ServiceMonitor scrape timeout
+      # @section -- Proxyscotch Container Parameters
+      scrapeTimeout: ""
+      # -- ServiceMonitor TLS configuration
+      # @section -- Proxyscotch Container Parameters
+      tlsConfig: {}
+      # -- ServiceMonitor metrics relabelings
+      # @section -- Proxyscotch Container Parameters
+      metricsRelabelings: []
+      # -- ServiceMonitor relabelings
+      # @section -- Proxyscotch Container Parameters
+      relabelings: []
+      # -- ServiceMonitor selector
+      # @section -- Proxyscotch Container Parameters
+      selector: {}
 
     # -- Array of extra environment variables to be added to wait for migrations containers
     # @section -- Default Init Containers Parameters

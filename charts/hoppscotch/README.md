@@ -502,6 +502,10 @@ unique for each release. This allows the job to be run multiple times without co
 | hoppscotch.backend.enterpriseLicenseKey                   | string | `""`                                   | Enterprise license key for Hoppscotch Enterprise features                                                  |
 | hoppscotch.backend.allowAuditLogs                         | bool   | `false`                                | Enable audit logs collection to ClickHouse. Enterprise Edition required.                                   |
 | hoppscotch.backend.horizontalScalingEnabled               | bool   | `false`                                | Enable horizontal scaling with Redis for state management. Enterprise Edition required.                    |
+| hoppscotch.proxyscotch.token                              | string | `""`                                   | Access token used to restrict access to the server                                                         |
+| hoppscotch.proxyscotch.allowedOrigins                     | list   | `["*"]`                                | List of allowed origins                                                                                    |
+| hoppscotch.proxyscotch.bannedOutputs                      | list   | `[]`                                   | List of banned outputs                                                                                     |
+| hoppscotch.proxyscotch.bannedDestinations                 | list   | `[]`                                   | List of banned proxy destinations                                                                          |
 
 ### Hoppscotch AIO Container Parameters
 
@@ -944,19 +948,123 @@ unique for each release. This allows the job to be run multiple times without co
 
 ### Default Init Containers Parameters
 
-| Key                                                        | Type   | Default          | Description                                                                                                         |
-| ---------------------------------------------------------- | ------ | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
-| defaultInitContainers.waitForDatabase.enabled              | bool   | `true`           | Enable init container that waits for database to be ready                                                           |
-| defaultInitContainers.waitForDatabase.image.repository     | string | `"postgres"`     | Wait for database image repository                                                                                  |
-| defaultInitContainers.waitForDatabase.image.pullPolicy     | string | `"IfNotPresent"` | Wait for database image pull policy                                                                                 |
-| defaultInitContainers.waitForDatabase.image.tag            | string | `"16-alpine"`    | Wait for database image tag                                                                                         |
-| defaultInitContainers.waitForDatabase.extraEnvVars         | list   | `[]`             | Array of extra environment variables to be added to wait for database containers                                    |
-| defaultInitContainers.waitForDatabase.extraEnvVarsCM       | string | `""`             | Name of the existing ConfigMap containing extra environment variables to be added to wait for database containers   |
-| defaultInitContainers.waitForDatabase.extraEnvVarsSecret   | string | `""`             | Name of existing Secret containing extra environment variables to be added to wait for database containers          |
-| defaultInitContainers.waitForMigrations.enabled            | bool   | `true`           | Enable init container that waits for migrations to complete                                                         |
-| defaultInitContainers.waitForMigrations.extraEnvVars       | list   | `[]`             | Array of extra environment variables to be added to wait for migrations containers                                  |
-| defaultInitContainers.waitForMigrations.extraEnvVarsCM     | string | `""`             | Name of the existing ConfigMap containing extra environment variables to be added to wait for migrations containers |
-| defaultInitContainers.waitForMigrations.extraEnvVarsSecret | string | `""`             | Name of existing Secret containing extra environment variables to be added to wait for migrations containers        |
+| Key                                                      | Type   | Default          | Description                                                                                                         |
+| -------------------------------------------------------- | ------ | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+| defaultInitContainers.waitForDatabase.enabled            | bool   | `true`           | Enable init container that waits for database to be ready                                                           |
+| defaultInitContainers.waitForDatabase.image.repository   | string | `"postgres"`     | Wait for database image repository                                                                                  |
+| defaultInitContainers.waitForDatabase.image.pullPolicy   | string | `"IfNotPresent"` | Wait for database image pull policy                                                                                 |
+| defaultInitContainers.waitForDatabase.image.tag          | string | `"16-alpine"`    | Wait for database image tag                                                                                         |
+| defaultInitContainers.waitForDatabase.extraEnvVars       | list   | `[]`             | Array of extra environment variables to be added to wait for database containers                                    |
+| defaultInitContainers.waitForDatabase.extraEnvVarsCM     | string | `""`             | Name of the existing ConfigMap containing extra environment variables to be added to wait for database containers   |
+| defaultInitContainers.waitForDatabase.extraEnvVarsSecret | string | `""`             | Name of existing Secret containing extra environment variables to be added to wait for database containers          |
+| defaultInitContainers.waitForMigrations.enabled          | bool   | `true`           | Enable init container that waits for migrations to complete                                                         |
+| proxyscotch.metrics.extraEnvVars                         | list   | `[]`             | Array of extra environment variables to be added to wait for migrations containers                                  |
+| proxyscotch.metrics.extraEnvVarsCM                       | string | `""`             | Name of the existing ConfigMap containing extra environment variables to be added to wait for migrations containers |
+| proxyscotch.metrics.extraEnvVarsSecret                   | string | `""`             | Name of existing Secret containing extra environment variables to be added to wait for migrations containers        |
+
+### Proxyscotch Container Parameters
+
+| Key                                                       | Type   | Default                    | Description                                                                                                          |
+| --------------------------------------------------------- | ------ | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| proxyscotch.enabled                                       | bool   | `false`                    | Enable Proxyscotch container                                                                                         |
+| proxyscotch.image.repository                              | string | `"hoppscotch/proxyscotch"` | Proxyscotch image repository                                                                                         |
+| proxyscotch.image.pullPolicy                              | string | `"IfNotPresent"`           | Proxyscotch image pull policy                                                                                        |
+| proxyscotch.image.tag                                     | string | `"v0.1.4"`                 | Proxyscotch image tag                                                                                                |
+| proxyscotch.replicaCount                                  | int    | `1`                        | Number of Proxyscotch replicas                                                                                       |
+| proxyscotch.containerPorts.http                           | int    | `80`                       | Proxyscotch HTTP container port                                                                                      |
+| proxyscotch.containerPorts.https                          | int    | `443`                      | Proxyscotch HTTPS container port                                                                                     |
+| proxyscotch.readinessProbe.enabled                        | bool   | `true`                     | Enable readiness probe                                                                                               |
+| proxyscotch.readinessProbe.initialDelaySeconds            | int    | `0`                        | Initial delay seconds for readiness probe                                                                            |
+| proxyscotch.readinessProbe.periodSeconds                  | int    | `10`                       | Period seconds for readiness probe                                                                                   |
+| proxyscotch.readinessProbe.timeoutSeconds                 | int    | `1`                        | Timeout seconds for readiness probe                                                                                  |
+| proxyscotch.readinessProbe.failureThreshold               | int    | `3`                        | Failure threshold for readiness probe                                                                                |
+| proxyscotch.readinessProbe.successThreshold               | int    | `1`                        | Success threshold for readiness probe                                                                                |
+| proxyscotch.customLivenessProbe                           | object | `{}`                       | Custom liveness probe that overrides the default one                                                                 |
+| proxyscotch.customReadinessProbe                          | object | `{}`                       | Custom readiness probe that overrides the default one                                                                |
+| proxyscotch.customStartupProbe                            | object | `{}`                       | Custom startup probe that overrides the default one                                                                  |
+| proxyscotch.extraEnvVars                                  | list   | `[]`                       | Array of extra environment variables to be added to Proxyscotch containers                                           |
+| proxyscotch.extraEnvVarsCM                                | string | `""`                       | Name of existing ConfigMap containing extra environment variables                                                    |
+| proxyscotch.extraEnvVarsSecret                            | string | `""`                       | Name of existing Secret containing extra environment variables                                                       |
+| proxyscotch.resourcesPreset                               | string | `"small"`                  | Set container resources according to one common preset (allowed values: nano, small, medium, large, xlarge, 2xlarge) |
+| proxyscotch.resources                                     | object | `{}`                       | Set container resources for Proxyscotch (overrides resourcesPreset)                                                  |
+| proxyscotch.podAnnotations                                | object | `{}`                       | Annotations to add to Proxyscotch pods                                                                               |
+| proxyscotch.podLabels                                     | object | `{}`                       | Labels to add to Proxyscotch pods                                                                                    |
+| proxyscotch.podSecurityContext                            | object | `{}`                       | Security context for Proxyscotch pods                                                                                |
+| proxyscotch.securityContext                               | object | `{}`                       | Security context for Proxyscotch containers                                                                          |
+| proxyscotch.updateStrategy.type                           | string | `"RollingUpdate"`          | Deployment update strategy type (RollingUpdate or Recreate)                                                          |
+| proxyscotch.pdb.create                                    | bool   | `false`                    | Create PodDisruptionBudget for Proxyscotch deployment                                                                |
+| proxyscotch.pdb.minAvailable                              | string | `""`                       | Minimum number of available pods during disruptions                                                                  |
+| proxyscotch.pdb.maxUnavailable                            | string | `""`                       | Maximum number of unavailable pods during disruptions                                                                |
+| proxyscotch.autoscaling.enabled                           | bool   | `false`                    | Enable autoscaling for Proxyscotch deployment                                                                        |
+| proxyscotch.autoscaling.minReplicas                       | int    | `1`                        | Minimum number of Proxyscotch replicas                                                                               |
+| proxyscotch.autoscaling.maxReplicas                       | int    | `100`                      | Maximum number of Proxyscotch replicas                                                                               |
+| proxyscotch.autoscaling.targetCPUUtilizationPercentage    | int    | `80`                       | Target CPU utilization percentage for autoscaling                                                                    |
+| proxyscotch.autoscaling.targetMemoryUtilizationPercentage | int    | `80`                       | Target memory utilization percentage for autoscaling                                                                 |
+| proxyscotch.nodeSelector                                  | object | `{}`                       | Node labels for Proxyscotch pods assignment                                                                          |
+| proxyscotch.tolerations                                   | list   | `[]`                       | Tolerations for Proxyscotch pods assignment                                                                          |
+| proxyscotch.affinity                                      | object | `{}`                       | Affinity for Proxyscotch pods assignment                                                                             |
+| proxyscotch.topologySpreadConstraints                     | list   | `[]`                       | Topology spread constraints for Proxyscotch pods assignment                                                          |
+| proxyscotch.volumes                                       | list   | `[]`                       | Extra volumes to add to Proxyscotch deployment                                                                       |
+| proxyscotch.volumeMounts                                  | list   | `[]`                       | Extra volume mounts to add to Proxyscotch containers                                                                 |
+| proxyscotch.service.type                                  | string | `"ClusterIP"`              | Kubernetes service type                                                                                              |
+| proxyscotch.service.ports.http                            | int    | `80`                       | Service HTTP port                                                                                                    |
+| proxyscotch.service.ports.https                           | int    | `443`                      | Service HTTPS port                                                                                                   |
+| proxyscotch.service.clusterIP                             | string | `""`                       | Static cluster IP address (optional)                                                                                 |
+| proxyscotch.service.nodePorts.http                        | string | `""`                       | NodePort for HTTP (when service type is NodePort)                                                                    |
+| proxyscotch.service.nodePorts.https                       | string | `""`                       | NodePort for HTTPS (when service type is NodePort)                                                                   |
+| proxyscotch.service.loadBalancerIP                        | string | `""`                       | Load balancer IP address (when service type is LoadBalancer)                                                         |
+| proxyscotch.service.loadBalancerSourceRanges              | list   | `[]`                       | Load balancer source IP ranges (when service type is LoadBalancer)                                                   |
+| proxyscotch.service.externalTrafficPolicy                 | string | `"Cluster"`                | External traffic policy (Cluster or Local)                                                                           |
+| proxyscotch.service.annotations                           | object | `{}`                       | Service annotations                                                                                                  |
+| proxyscotch.service.sessionAffinity                       | string | `"None"`                   | Session affinity (None or ClientIP)                                                                                  |
+| proxyscotch.service.sessionAffinityConfig                 | object | `{}`                       | Session affinity configuration                                                                                       |
+| proxyscotch.service.extraPorts                            | list   | `[]`                       | Extra service ports                                                                                                  |
+| proxyscotch.networkPolicy.enabled                         | bool   | `false`                    | Enable NetworkPolicy for Proxyscotch pods                                                                            |
+| proxyscotch.networkPolicy.allowExternal                   | bool   | `true`                     | Allow external traffic to Proxyscotch pods                                                                           |
+| proxyscotch.networkPolicy.allowExternalEgress             | bool   | `true`                     | Allow external egress traffic from Proxyscotch pods                                                                  |
+| proxyscotch.networkPolicy.addExternalClientAccess         | bool   | `true`                     | Add external client access to NetworkPolicy                                                                          |
+| proxyscotch.networkPolicy.extraIngress                    | list   | `[]`                       | Extra ingress rules for NetworkPolicy                                                                                |
+| proxyscotch.networkPolicy.extraEgress                     | list   | `[]`                       | Extra egress rules for NetworkPolicy                                                                                 |
+| proxyscotch.networkPolicy.ingressPodMatchLabels           | object | `{}`                       | Pod selector labels for ingress rules                                                                                |
+| proxyscotch.networkPolicy.ingressNSMatchLabels            | object | `{}`                       | Namespace selector labels for ingress rules                                                                          |
+| proxyscotch.networkPolicy.ingressNSPodMatchLabels         | object | `{}`                       | Namespace pod selector labels for ingress rules                                                                      |
+| proxyscotch.ingress.enabled                               | bool   | `false`                    | Enable ingress for Proxyscotch                                                                                       |
+| proxyscotch.ingress.ingressClassName                      | string | `""`                       | Ingress class name                                                                                                   |
+| proxyscotch.ingress.hostname                              | string | `"proxyscotch.local"`      | Ingress hostname                                                                                                     |
+| proxyscotch.ingress.path                                  | string | `"/"`                      | Ingress path                                                                                                         |
+| proxyscotch.ingress.pathType                              | string | `"ImplementationSpecific"` | Ingress path type                                                                                                    |
+| proxyscotch.ingress.apiVersion                            | string | `""`                       | Ingress API version                                                                                                  |
+| proxyscotch.ingress.annotations                           | object | `{}`                       | Ingress annotations                                                                                                  |
+| proxyscotch.ingress.tls                                   | bool   | `false`                    | Enable TLS for ingress                                                                                               |
+| proxyscotch.ingress.selfSigned                            | bool   | `false`                    | Create self-signed TLS certificates                                                                                  |
+| proxyscotch.ingress.extraHosts                            | list   | `[]`                       | Extra hostnames for ingress                                                                                          |
+| proxyscotch.ingress.extraPaths                            | list   | `[]`                       | Extra paths for ingress                                                                                              |
+| proxyscotch.ingress.extraTls                              | list   | `[]`                       | Extra TLS configurations for ingress                                                                                 |
+| proxyscotch.ingress.secrets                               | list   | `[]`                       | TLS secrets for ingress                                                                                              |
+| proxyscotch.ingress.extraRules                            | list   | `[]`                       | Extra ingress rules                                                                                                  |
+| proxyscotch.persistence.enabled                           | bool   | `false`                    | Enable persistent storage for Proxyscotch                                                                            |
+| proxyscotch.persistence.storageClass                      | string | `""`                       | Storage class for persistent volume                                                                                  |
+| proxyscotch.persistence.accessModes                       | list   | `["ReadWriteOnce"]`        | Access modes for persistent volume                                                                                   |
+| proxyscotch.persistence.size                              | string | `"8Gi"`                    | Size of persistent volume                                                                                            |
+| proxyscotch.persistence.mountPath                         | string | `"/proxyscotch/data"`      | Mount path for persistent volume                                                                                     |
+| proxyscotch.persistence.subPath                           | string | `""`                       | Subpath within persistent volume                                                                                     |
+| proxyscotch.persistence.annotations                       | object | `{}`                       | Annotations for persistent volume claim                                                                              |
+| proxyscotch.persistence.dataSource                        | object | `{}`                       | Data source for persistent volume                                                                                    |
+| proxyscotch.persistence.existingClaim                     | string | `""`                       | Use existing persistent volume claim                                                                                 |
+| proxyscotch.persistence.selector                          | object | `{}`                       | Selector for persistent volume                                                                                       |
+| proxyscotch.metrics.enabled                               | bool   | `false`                    | Enable metrics collection for Proxyscotch                                                                            |
+| proxyscotch.metrics.serviceMonitor.enabled                | bool   | `false`                    | Enable ServiceMonitor for Prometheus monitoring                                                                      |
+| proxyscotch.metrics.serviceMonitor.namespace              | string | `""`                       | Namespace for ServiceMonitor (defaults to release namespace)                                                         |
+| proxyscotch.metrics.serviceMonitor.annotations            | object | `{}`                       | ServiceMonitor annotations                                                                                           |
+| proxyscotch.metrics.serviceMonitor.labels                 | object | `{}`                       | ServiceMonitor labels                                                                                                |
+| proxyscotch.metrics.serviceMonitor.jobLabel               | string | `""`                       | ServiceMonitor job label                                                                                             |
+| proxyscotch.metrics.serviceMonitor.honorLabels            | bool   | `false`                    | Honor labels from target                                                                                             |
+| proxyscotch.metrics.serviceMonitor.interval               | string | `""`                       | ServiceMonitor scrape interval                                                                                       |
+| proxyscotch.metrics.serviceMonitor.scrapeTimeout          | string | `""`                       | ServiceMonitor scrape timeout                                                                                        |
+| proxyscotch.metrics.serviceMonitor.tlsConfig              | object | `{}`                       | ServiceMonitor TLS configuration                                                                                     |
+| proxyscotch.metrics.serviceMonitor.metricsRelabelings     | list   | `[]`                       | ServiceMonitor metrics relabelings                                                                                   |
+| proxyscotch.metrics.serviceMonitor.relabelings            | list   | `[]`                       | ServiceMonitor relabelings                                                                                           |
+| proxyscotch.metrics.serviceMonitor.selector               | object | `{}`                       | ServiceMonitor selector                                                                                              |
 
 ### Other Parameters
 
