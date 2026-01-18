@@ -2,7 +2,7 @@ suite: Proxyscotch ConfigMap
 templates:
   - proxyscotch/configmap.yaml
 tests:
-  - it: should generate a configmap when proxyscotch is enabled
+  - it: should generate configmap when proxyscotch is enabled
     set:
       proxyscotch:
         enabled: true
@@ -11,7 +11,7 @@ tests:
           apiVersion: v1
           kind: ConfigMap
 
-  - it: should not generate a configmap when proxyscotch is disabled
+  - it: should not generate configmap when proxyscotch is disabled
     set:
       proxyscotch:
         enabled: false
@@ -19,46 +19,137 @@ tests:
       - hasDocuments:
           count: 0
 
-#  - it: should set name to proxyscotch name
-#    set: {}
-#    asserts: []
-#
-#  - it: should set namespace to hoppscotch namespace
-#    set: {}
-#    asserts: []
-#
-#  - it: should set component label to proxyscotch component
-#    set: {}
-#    asserts: []
-#
-#  - it: should set add hoppscotch labels
-#    set: {}
-#    asserts: []
-#
-#  - it: should set add common annotations
-#    set: {}
-#    asserts: []
-#
-#  - it: should set proxyscotch allowed origins when specified
-#    set: {}
-#    asserts: []
-#
-#  - it: should set proxyscotch allowed origins to "*" when not specified
-#    set: {}
-#    asserts: []
-#
-#  - it: should set proxyscotch banned outputs when specified
-#    set: {}
-#    asserts: []
-#
-#  - it: should set proxyscotch banned outputs to "" when not specified
-#    set: {}
-#    asserts: []
-#
-#  - it: should set proxyscotch banned destinations when specified
-#    set: {}
-#    asserts: []
-#
-#  - it: should set proxyscotch banned destinations to "" when not specified
-#    set: {}
-#    asserts: []
+  - it: should set name to proxyscotch name
+    set:
+      proxyscotch:
+        enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: v1
+          kind: ConfigMap
+          name: release-name-hoppscotch-proxyscotch
+
+  - it: should set namespace to hoppscotch namespace
+    set:
+      proxyscotch:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: NAMESPACE
+
+  - it: should set component label to proxyscotch component
+    set:
+      proxyscotch:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: proxyscotch
+
+  - it: should set add hoppscotch labels
+    chart:
+      version: 0.0.0
+      appVersion: 0.0.0
+    set:
+      proxyscotch:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: hoppscotch
+      - equal:
+          path: metadata.labels["app.kubernetes.io/part-of"]
+          value: hoppscotch
+      - equal:
+          path: metadata.labels["app.kubernetes.io/version"]
+          value: 0.0.0
+      - equal:
+          path: metadata.labels["helm.sh/chart"]
+          value: hoppscotch-0.0.0
+
+  - it: should set add common annotations
+    set:
+      commonAnnotations:
+        test: test
+      proxyscotch:
+        enabled: true
+    asserts:
+      - equal:
+          path: metadata.annotations["test"]
+          value: test
+
+  - it: should set proxyscotch allowed origins when specified
+    set:
+      hoppscotch:
+        proxyscotch:
+          allowedOrigins:
+            - https://origin1.example.com
+            - https://origin2.example.com
+      proxyscotch:
+        enabled: true
+    asserts:
+      - equal:
+          path: data.PROXYSCOTCH_ALLOWED_ORIGINS
+          value: https://origin1.example.com,https://origin2.example.com
+
+  - it: should set proxyscotch allowed origins to "*" when not specified
+    set:
+      proxyscotch:
+        enabled: true
+    asserts:
+      - equal:
+          path: data.PROXYSCOTCH_ALLOWED_ORIGINS
+          value: "*"
+
+  - it: should set proxyscotch banned outputs when specified
+    set:
+      hoppscotch:
+        proxyscotch:
+          bannedOutputs:
+            - https://output1.example.com
+            - https://output2.example.com
+      proxyscotch:
+        enabled: true
+    asserts:
+      - equal:
+          path: data.PROXYSCOTCH_BANNED_OUTPUTS
+          value: https://output1.example.com,https://output2.example.com
+
+  - it: should set proxyscotch banned outputs to "" when not specified
+    set:
+      proxyscotch:
+        enabled: true
+    asserts:
+      - equal:
+          path: data.PROXYSCOTCH_BANNED_OUTPUTS
+          value: ""
+
+  - it: should set proxyscotch banned destinations when specified
+    set:
+      hoppscotch:
+        proxyscotch:
+          bannedDestinations:
+            - https://destination1.example.com
+            - https://destination2.example.com
+      proxyscotch:
+        enabled: true
+    asserts:
+      - equal:
+          path: data.PROXYSCOTCH_BANNED_DESTS
+          value: https://destination1.example.com,https://destination2.example.com
+
+  - it: should set proxyscotch banned destinations to "" when not specified
+    set:
+      proxyscotch:
+        enabled: true
+    asserts:
+      - equal:
+          path: data.PROXYSCOTCH_BANNED_DESTS
+          value: ""
