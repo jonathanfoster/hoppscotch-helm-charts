@@ -305,9 +305,9 @@ hoppscotch:
     # @section -- Hoppscotch Application Parameters
     allowAuditLogs: false
 
+    # @ignored
     clickhouse:
-      # @ignored -- Enable audit logs collection to ClickHouse. Enterprise Edition required. Deprecated: use
-      # `hoppscotch.backend.allowAuditLogs` instead.
+      # -- Enable audit logs collection to ClickHouse. Enterprise Edition required. Deprecated: use `hoppscotch.backend.allowAuditLogs` instead.
       # @section -- Hoppscotch Application Parameters
       allowAuditLogs: false
 

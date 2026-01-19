@@ -1,7 +1,7 @@
 extends: default
-ignore-from-file:
-  - .gitignore
-  - .yamlignore
+ignore: |
+  charts/*/templates/*
+  charts/*/values.yaml
 rules:
   comments:
     min-spaces-from-content: 1
