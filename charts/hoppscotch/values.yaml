@@ -1816,7 +1816,7 @@ proxyscotch:
   containerPorts:
     # -- Proxyscotch HTTP container port
     # @section -- Proxyscotch Container Parameters
-    http: 80
+    http: 9159
     # -- Proxyscotch HTTPS container port
     # @section -- Proxyscotch Container Parameters
     https: 443

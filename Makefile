@@ -8,7 +8,7 @@ CHART_VALUES?=charts/${CHART_NAME}/ci/default-values.yaml
 CLUSTER_NAME?=helm-charts
 TEST_E2E_DIR:=test/e2e
 TEST_UNIT_FILE?=tests/**/*_test.yaml
-TEST_UNIT_CHARTS?=charts/*
+TEST_UNIT_CHART?=charts/${CHART_NAME}
 
 .PHONY: clean
 clean: ## Clean up temporary resources
@@ -250,4 +250,9 @@ test-integration: helm-test ## Run integration tests
 .PHONY: test-unit
 test-unit: ## Run unit tests
 	@echo "Running unit tests"
-	helm unittest -f '${TEST_UNIT_FILE}' ${TEST_UNIT_CHARTS}
+	helm unittest -f '${TEST_UNIT_FILE}' ${TEST_UNIT_CHART}
+
+.PHONY: test-unit-debug
+test-unit-debug: ## Run unit tests in debug mode
+	@echo "Running unit tests in debug mode"
+	helm unittest -d -f '${TEST_UNIT_FILE}' ${TEST_UNIT_CHART}
