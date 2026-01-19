@@ -22,3 +22,144 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  - it: should set name
+    set:
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: autoscaling/v2
+          kind: HorizontalPodAutoscaler
+          name: release-name-hoppscotch-proxyscotch
+
+  - it: should set namespace
+    set:
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: NAMESPACE
+
+  - it: should set component label
+    set:
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: proxyscotch
+
+  - it: should set hoppscotch labels
+    chart:
+      version: 0.0.0
+      appVersion: 0.0.0
+    set:
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: hoppscotch
+      - equal:
+          path: metadata.labels["app.kubernetes.io/part-of"]
+          value: hoppscotch
+      - equal:
+          path: metadata.labels["app.kubernetes.io/version"]
+          value: 0.0.0
+      - equal:
+          path: metadata.labels["helm.sh/chart"]
+          value: hoppscotch-0.0.0
+
+  - it: should set common annotations
+    set:
+      commonAnnotations:
+        test: test
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+    asserts:
+      - equal:
+          path: metadata.annotations["test"]
+          value: test
+
+  - it: should set scale target ref name
+    set:
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+    asserts:
+      - equal:
+          path: spec.scaleTargetRef.name
+          value: proxyscotch
+
+  - it: should set min replicas
+    set:
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+          minReplicas: 10
+    asserts:
+      - equal:
+          path: spec.minReplicas
+          value: 10
+
+  - it: should set max replicas
+    set:
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+          maxReplicas: 100
+    asserts:
+      - equal:
+          path: spec.maxReplicas
+          value: 100
+
+  - it: should set target CPU utilization percentage
+    set:
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+          targetCPUUtilizationPercentage: 75
+    asserts:
+      - equal:
+          path: spec.metrics[0].resource.name
+          value: cpu
+      - equal:
+          path: spec.metrics[0].resource.target.averageUtilization
+          value: 75
+
+  - it: should set target memory utilization percentage
+    set:
+      proxyscotch:
+        enabled: true
+        autoscaling:
+          enabled: true
+          targetMemoryUtilizationPercentage: 75
+    asserts:
+      - equal:
+          path: spec.metrics[1].resource.name
+          value: memory
+      - equal:
+          path: spec.metrics[1].resource.target.averageUtilization
+          value: 75
