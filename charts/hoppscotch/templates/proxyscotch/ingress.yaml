@@ -44,7 +44,7 @@ spec:
             pathType: {{ default "ImplementationSpecific" .pathType }}
             backend:
               service:
-                name: {{ include "hoppscotch.proxyscotch.name" . }}
+                name: {{ include "hoppscotch.proxyscotch.name" $ }}
                 port:
                   number: {{ $.Values.proxyscotch.service.ports.http }}
     {{- end }}
@@ -59,7 +59,7 @@ spec:
       secretName: {{ printf "%s-tls" .Values.proxyscotch.ingress.hostname }}
     {{- end }}
     {{- if .Values.proxyscotch.ingress.extraTls }}
-    {{- .Values.proxyscotch.ingress.extraTls | nindent 4 }}
+    {{- toYaml .Values.proxyscotch.ingress.extraTls | nindent 4 }}
     {{- end }}
   {{- end }}
 {{- end }}

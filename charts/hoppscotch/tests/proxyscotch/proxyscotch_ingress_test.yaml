@@ -22,3 +22,312 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  - it: should set name
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+    asserts:
+      - containsDocument:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          name: release-name-hoppscotch-proxyscotch
+
+  - it: should set namespace
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: NAMESPACE
+
+  - it: should set component label
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: proxyscotch
+
+  - it: should set hoppscotch labels
+    chart:
+      version: 0.0.0
+      appVersion: 0.0.0
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: RELEASE-NAME
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: hoppscotch
+      - equal:
+          path: metadata.labels["app.kubernetes.io/part-of"]
+          value: hoppscotch
+      - equal:
+          path: metadata.labels["app.kubernetes.io/version"]
+          value: 0.0.0
+      - equal:
+          path: metadata.labels["helm.sh/chart"]
+          value: hoppscotch-0.0.0
+
+  - it: should set common annotations
+    set:
+      commonAnnotations:
+        test: test
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+    asserts:
+      - equal:
+          path: metadata.annotations["test"]
+          value: test
+
+  - it: should set ingress class name when specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          ingressClassName: custom-ingress-class
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: custom-ingress-class
+
+  - it: should set ingress rule host name when specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          hostname: custom-host-name
+    asserts:
+      - equal:
+          path: spec.rules[0].host
+          value: custom-host-name
+
+  - it: should set ingress rule extra paths when specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          extraPaths:
+            - path: /test
+              pathType: Prefix
+              backend:
+                service:
+                  name: test-service
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths[0]
+          value:
+            path: /test
+            pathType: Prefix
+            backend:
+              service:
+                name: test-service
+
+  - it: should set ingress rule path
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          path: /test
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /test
+
+  - it: should set ingress rule path type
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths[0].pathType
+          value: Prefix
+
+  - it: should set ingress rule backend service name
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.name
+          value: release-name-hoppscotch-proxyscotch
+
+  - it: should set ingress rule backend service port
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+        service:
+          ports:
+            http: 8080
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.number
+          value: 8080
+
+  - it: should set ingress rule extra hosts name when extra hosts are specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          extraHosts:
+            - name: custom-host-name
+    asserts:
+      - equal:
+          path: spec.rules[1].host
+          value: custom-host-name
+
+  - it: should set ingress rule extra hosts path when extra hosts are specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          extraHosts:
+            - name: custom-host-name
+              path: /test
+    asserts:
+      - equal:
+          path: spec.rules[1].http.paths[0].path
+          value: /test
+
+  - it: should set ingress rule extra hosts path type when extra hosts are specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          extraHosts:
+            - name: custom-host-name
+              path: /test
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[1].http.paths[0].pathType
+          value: Prefix
+
+  - it: should set ingress rule extra hosts backend service name when extra hosts are specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          extraHosts:
+            - name: custom-host-name
+    asserts:
+      - equal:
+          path: spec.rules[1].http.paths[0].backend.service.name
+          value: release-name-hoppscotch-proxyscotch
+
+  - it: should set ingress rule extra hosts backend service port when extra hosts are specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          extraHosts:
+            - name: custom-host-name
+        service:
+          ports:
+            http: 8080
+    asserts:
+      - equal:
+          path: spec.rules[1].http.paths[0].backend.service.port.number
+          value: 8080
+
+  - it: should set ingress extra rules when specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          extraRules:
+            - host: extra-rule-host
+              http:
+                paths:
+                  - path: /extra-rule-path
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: extra-rule-service
+                        port:
+                          number: 8080
+    asserts:
+      - equal:
+          path: spec.rules[1]
+          value:
+            host: extra-rule-host
+            http:
+              paths:
+                - path: /extra-rule-path
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: extra-rule-service
+                      port:
+                        number: 8080
+
+  - it: should set ingress tls when specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          hostname: test.example.com
+          tls: true
+          selfSigned: true
+    asserts:
+      - equal:
+          path: spec.tls[0]
+          value:
+            hosts:
+              - test.example.com
+            secretName: test.example.com-tls
+
+  - it: should set ingress extra tls when specified
+    set:
+      proxyscotch:
+        enabled: true
+        ingress:
+          enabled: true
+          extraTls:
+            - hosts:
+                - extra-tls-host.example.com
+              secretName: extra-tls-host-tls
+    asserts:
+      - equal:
+          path: spec.tls[0]
+          value:
+            hosts:
+              - extra-tls-host.example.com
+            secretName: extra-tls-host-tls
